@@ -41,7 +41,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.MapFragment;
 
 import com.govelapp.govelapp.jsonparser.QueryParser;
-import com.govelapp.govelapp.locationmenager.GPSTracker;
 import com.govelapp.govelapp.locationmenager.LocationManagerCheck;
 import com.govelapp.govelapp.restclient.RestClient;
 import com.govelapp.govelapp.shopclasses.Shop;
@@ -70,8 +69,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0;
 
-    GPSTracker gps = new GPSTracker(this);
-
     private FloatingActionButton settingsButton, gMapButton, mLocationButton;
 
     private Marker selectedMarker;
@@ -94,30 +91,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
-        //create a seperate adapter for maps activity search actv
-        /*actv = (AutoCompleteTextView) findViewById(R.id.search);
-        String[] items = {"tea", "apple", "phone case", "tooth paste", "tennis racket",
-         "tooth brush", "tooth pick", "kahve"}; //this is for testing purposes
-        ArrayAdapter<String> adapter = new ArrayAdapter<>
-                (this, android.R.layout.simple_expandable_list_item_1, items);
-        actv.setAdapter(adapter);
-        actv.setText(getIntent().getExtras().getString("query"));
-        actv.clearFocus();
-        actv.setSelection(actv.getText().length());
-        actv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String mapsQuery = actv.getText().toString();
-                actv.setText(mapsQuery);
-                actv.setSelection(mapsQuery.length()); //set the cursor position
-                if (mapsQuery.length() > 0 && queryValidityTest(mapsQuery)) {
-                    query = mapsQuery;
-                    new webGetSetMarkers().execute(url, query);
-                } else {
-                    Toast.makeText(MapsActivity.this, "Invalid query.", Toast.LENGTH_LONG).show();
-                }
-            }
-        });*/
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            Toast.makeText(MapsActivity.this, "if true, permission", Toast.LENGTH_LONG).show();
+
+
+        }else{
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            Toast.makeText(MapsActivity.this, "if false, permission", Toast.LENGTH_LONG).show();
+
+        }
 
         query = getIntent().getExtras().getString("query");
     }
@@ -146,16 +133,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         LocationManagerCheck locationManagerCheck = new LocationManagerCheck(this);
         Location location = null;
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }else{
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
 
         if (locationManagerCheck.isLocationServiceAvailable()) {
             if (locationManagerCheck.getProviderType() == 1) {
@@ -191,6 +168,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        mLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude_cur, longitude_cur), 16.5f));
+            }
+        });
+
         showcaseBesiktas();
     }
 
@@ -215,43 +199,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }*/
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    mLocationButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            if(gps.canGetLocation()){
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gps.getLatitude(), gps.getLongitude()), 16.5f));
-                            }else{
-                                Toast.makeText(MapsActivity.this, "cant get location.", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
