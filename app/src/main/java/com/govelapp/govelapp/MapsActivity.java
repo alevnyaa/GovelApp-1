@@ -5,37 +5,30 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SlidingPaneLayout;
+import com.google.android.gms.location.LocationListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -48,6 +41,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.MapFragment;
 
 import com.govelapp.govelapp.jsonparser.QueryParser;
+import com.govelapp.govelapp.locationmenager.GPSTracker;
 import com.govelapp.govelapp.locationmenager.LocationManagerCheck;
 import com.govelapp.govelapp.restclient.RestClient;
 import com.govelapp.govelapp.shopclasses.Shop;
@@ -57,7 +51,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleMap.OnMarkerClickListener {
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
@@ -69,7 +64,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SlidingUpPanelLayout slidingLayout;
     private Toolbar mToolbar;
 
-     private Marker selectedMarker;
+    private double latitude, longitude, longitude_cur, latitude_cur;
+
+    private Location mLastLocation;
+
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0;
+
+    GPSTracker gps = new GPSTracker(this);
+
+    private FloatingActionButton settingsButton, gMapButton, mLocationButton;
+
+    private Marker selectedMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,13 +86,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        settingsButton = (FloatingActionButton) findViewById(R.id.buttonOptions);
+        gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
+        mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
+
         //slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         //create a seperate adapter for maps activity search actv
         /*actv = (AutoCompleteTextView) findViewById(R.id.search);
-        String[] items = {"tea", "apple", "phone case", "tooth paste", "tennis racket", "tooth brush", "tooth pick", "kahve"}; //this is for testing purposes
+        String[] items = {"tea", "apple", "phone case", "tooth paste", "tennis racket",
+         "tooth brush", "tooth pick", "kahve"}; //this is for testing purposes
         ArrayAdapter<String> adapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_expandable_list_item_1, items);
         actv.setAdapter(adapter);
@@ -134,33 +144,52 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mToolbar.setTitle(query);
         ActionBar mActionBar = getSupportActionBar();
 
-        //need to hide the keyboard, couldn't figure out how
-       /* View view = this.getCurrentFocus();
-        view.clearFocus(); */
-
         LocationManagerCheck locationManagerCheck = new LocationManagerCheck(this);
         Location location = null;
 
-        if(locationManagerCheck.isLocationServiceAvailable()){
-            if (locationManagerCheck.getProviderType() == 1){
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }else{
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+
+        if (locationManagerCheck.isLocationServiceAvailable()) {
+            if (locationManagerCheck.getProviderType() == 1) {
                 //    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            }
-            else if (locationManagerCheck.getProviderType() == 2){
+            } else if (locationManagerCheck.getProviderType() == 2) {
                 //  location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
-        }else{
+        } else {
             locationManagerCheck.createLocationServiceError(MapsActivity.this);
         }
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(MapsActivity.this, "Location enabled", Toast.LENGTH_LONG).show();
             mMap.setMyLocationEnabled(true);
         } else {
             Toast.makeText(MapsActivity.this, "Location permission is disabled.", Toast.LENGTH_SHORT).show();
             //request permission
         }
+
+        gMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (latitude != 0.0 && longitude != 0.0) {
+                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                            Uri.parse("http://maps.google.com/maps?saddr=" + latitude_cur + ","
+                                    + longitude_cur + "&daddr=" + latitude + "," + longitude));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+                    startActivity(intent);
+                }
+            }
+        });
 
         showcaseBesiktas();
     }
@@ -187,6 +216,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }*/
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    mLocationButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(gps.canGetLocation()){
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gps.getLatitude(), gps.getLongitude()), 16.5f));
+                            }else{
+                                Toast.makeText(MapsActivity.this, "cant get location.", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -200,8 +265,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public boolean onMarkerClick(final Marker marker){
+    public boolean onMarkerClick(final Marker marker) {
         selectedMarker = marker;
+        latitude = marker.getPosition().latitude;
+        longitude = marker.getPosition().longitude;
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         ((TextView) findViewById(R.id.shopNameText)).setText(marker.getTitle());
 
@@ -219,17 +286,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 {"Sanat Copy Center", "41.043967", "29.008068"},
                 {"Tiridi Fabrika", "41.043913", "29.008064"}
         };
-        for(int i=0; i<showcasePlaces.length; i++){
+        for (int i = 0; i < showcasePlaces.length; i++) {
             LatLng placeLatLng = new LatLng(Double.parseDouble(showcasePlaces[i][1]),
                     Double.parseDouble(showcasePlaces[i][2]));
-            Marker placeMarker = mMap.addMarker(new MarkerOptions()
+            mMap.addMarker(new MarkerOptions()
                     .position(placeLatLng)
                     .title(showcasePlaces[i][0])
                     .snippet("Copy & Print")
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_flare_black_48dp)));
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_location_pin)));
         }
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(41.044066, 29.008070), 16.5f));
     }
 
 
@@ -278,5 +344,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onCancelled(result);
         }
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                    || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            }else{
+                Intent backIntent = new Intent(MapsActivity.this, MainActivity.class);
+                startActivity(backIntent);
+                finish();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 }
 

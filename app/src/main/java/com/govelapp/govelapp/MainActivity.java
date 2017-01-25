@@ -3,6 +3,7 @@ package com.govelapp.govelapp;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -112,12 +113,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onKeyDown: " + keyCode);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Log.d(TAG, "key is back");
-                Log.d(TAG, "key is back and logo not shown");
+            if(logo.isShown()){
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }else{
                 logo.setVisibility(View.VISIBLE);
                 searchBar.clearFocus();
+            }
             return true;
         }
         return super.onKeyDown(keyCode, event);
