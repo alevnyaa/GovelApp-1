@@ -6,20 +6,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SlidingPaneLayout;
-import com.google.android.gms.location.LocationListener;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,7 +29,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -51,7 +52,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
@@ -66,6 +67,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double latitude, longitude, longitude_cur, latitude_cur;
 
     private Location mLastLocation;
+
+    private GoogleApiClient mGoogleApiClient;
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0;
 
@@ -87,26 +90,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
         mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
 
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+
         //slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            Toast.makeText(MapsActivity.this, "if true, permission", Toast.LENGTH_LONG).show();
-
-
-        }else{
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            Toast.makeText(MapsActivity.this, "if false, permission", Toast.LENGTH_LONG).show();
-
-        }
-
         query = getIntent().getExtras().getString("query");
+    }
+
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
 
@@ -171,7 +178,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude_cur, longitude_cur), 16.5f));
+                LatLng latLng = new LatLng(latitude_cur,longitude_cur);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
             }
         });
 
@@ -199,6 +207,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
     }*/
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+           latitude_cur = mLastLocation.getLatitude();
+            longitude_cur = mLastLocation.getLongitude();
+            LatLng latLng = new LatLng(latitude_cur,longitude_cur);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -250,6 +285,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean queryValidityTest(String s) {
         Matcher mMatch = queryPattern.matcher(s);
         return mMatch.matches();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     //url, query, void ---- params[0], params[1], void
