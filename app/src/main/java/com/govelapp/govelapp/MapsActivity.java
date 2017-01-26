@@ -142,6 +142,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mToolbar.setTitle(query);
 
+        doSearch(query);
+
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -334,10 +336,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onQueryTextSubmit(String query) {
         if(isValid(query)){
+            doSearch(query);
         }else{
             Toast.makeText(MapsActivity.this, "Invalid search parameters.", Toast.LENGTH_LONG).show();
         }
         return false;
+    }
+
+    private void doSearch(String query){
+        String params[] = {url, query};
+        try{
+            new webGetSetMarkers().execute(params);
+        }catch (Exception e){
+            Toast.makeText(MapsActivity.this, "Couldn't connect", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -346,10 +358,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     //url, query, void ---- params[0], params[1], void
-    private class webGetSetMarkers extends AsyncTask<String, String, Void> {
+    private class webGetSetMarkers extends AsyncTask<String, Void, Void> {
         //loading screen(?)
         @Override
         protected void onPreExecute() {
+            Toast.makeText(MapsActivity.this, "Getting info from url.", Toast.LENGTH_LONG).show();
             super.onPreExecute();
         }
 
@@ -359,21 +372,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             RestClient rc = new RestClient();
             String jsonReply = rc.getStandardQueryJson(params[0], params[1]);
 
-            QueryParser qp = new QueryParser();
-            shopList = qp.parseShopList(jsonReply);
+            if(!jsonReply.isEmpty()){
+                QueryParser qp = new QueryParser();
+                shopList = qp.parseShopList(jsonReply);
+            }else{
+                Toast.makeText(MapsActivity.this, "jSonReply is empty", Toast.LENGTH_LONG).show();
+            }
             return null;
         }
 
         //do after doInBackground is finished
         @Override
         protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
             for (Shop sh : shopList) {
                 mMap.addMarker(sh.getMarkerOptions());
             }
+            super.onPostExecute(result);
         }
 
-       /* @Override
+        /*@Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
         }*/

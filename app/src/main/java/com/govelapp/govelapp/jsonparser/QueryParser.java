@@ -53,7 +53,7 @@ public class QueryParser {
     public static final String TAG = "QueryParser";
 
     public static List<Shop> parseShopList(String restReply){
-        List<Shop> shopList = new ArrayList<Shop>();
+        List<Shop> shopList = new ArrayList<>();
         try {
             JSONObject jsonRoot = new JSONObject(restReply);
             JSONArray places = jsonRoot.getJSONArray("places");
