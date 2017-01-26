@@ -24,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
@@ -53,7 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SearchView.OnQueryTextListener {
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
@@ -76,6 +77,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton settingsButton, gMapButton, mLocationButton;
 
     private Marker selectedMarker;
+
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,13 +145,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                final MenuItem searchMenuItem = menu.findItem(R.id.search);
+                searchMenuItem.expandActionView();
             }
         });
-        ActionBar mActionBar = getSupportActionBar();
 
         LocationManagerCheck locationManagerCheck = new LocationManagerCheck(this);
-        Location location = null;
 
         if (locationManagerCheck.isLocationServiceAvailable()) {
             if (locationManagerCheck.getProviderType() == 1) {
@@ -255,9 +257,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -274,6 +273,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        this.menu = menu;
         return true;
     }
 
@@ -314,7 +315,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     //returns true if its a valid query
-    private boolean queryValidityTest(String s) {
+    private boolean isValid(String s) {
         Matcher mMatch = queryPattern.matcher(s);
         return mMatch.matches();
     }
@@ -328,6 +329,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onLocationChanged(Location location) {
         latitude_cur = location.getLatitude();
         longitude_cur = location.getLongitude();
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        if(isValid(query)){
+        }else{
+            Toast.makeText(MapsActivity.this, "Invalid search parameters.", Toast.LENGTH_LONG).show();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
     }
 
     //url, query, void ---- params[0], params[1], void

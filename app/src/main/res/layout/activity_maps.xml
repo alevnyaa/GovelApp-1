@@ -104,7 +104,7 @@ sothree:umanoShadowHeight="4dp">
                 android:textColor="@color/colorPrimary"
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
-                android:textSize="35sp" />
+                android:textSize="25sp" />
 
         </LinearLayout>
 
