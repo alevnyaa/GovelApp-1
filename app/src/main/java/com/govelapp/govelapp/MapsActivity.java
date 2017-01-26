@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -58,7 +60,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
-    private AutoCompleteTextView actv;
     private String url = "govelapp.com/api";     //getResources().getString(R.string.url);
     private List<Shop> shopList;
     private String query;
@@ -94,6 +95,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
         gMapButton.setVisibility(View.GONE);
         mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
+
+        if(mLastLocation != null){
+            mLastLocation.reset();
+        }
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -142,7 +147,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mToolbar.setTitle(query);
 
-        doSearch(query);
+        //doSearch(query);
 
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,9 +161,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (locationManagerCheck.isLocationServiceAvailable()) {
             if (locationManagerCheck.getProviderType() == 1) {
-                //    location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                   // mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             } else if (locationManagerCheck.getProviderType() == 2) {
-                //  location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                 // mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
         } else {
             locationManagerCheck.createLocationServiceError(MapsActivity.this);
@@ -191,7 +196,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LatLng latLng = new LatLng(latitude_cur,longitude_cur);
+                LatLng latLng = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
             }
         });
@@ -201,16 +206,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     //this is for options menu on toolbar
-  /*  @Override
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
                 // User chose the "Settings" item, show the app settings UI...
-                return true;
-
-            case R.id.action_favorite:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
                 return true;
 
             default:
@@ -219,7 +219,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return super.onOptionsItemSelected(item);
 
         }
-    }*/
+    }
 
     @Override
     public void onConnected(Bundle connectionHint) {
@@ -324,6 +324,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d("Maps Activity", "onConnectionFailed: Connection Failed");
 
     }
 

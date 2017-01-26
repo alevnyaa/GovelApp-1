@@ -42,7 +42,7 @@ sothree:umanoShadowHeight="4dp">
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context="com.govelapp.govelapp.MapsActivity"
-            tools:layout="@layout/activity_maps" />
+            tools:layout="@layout/activity_maps" /> -->
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/buttonDirection"

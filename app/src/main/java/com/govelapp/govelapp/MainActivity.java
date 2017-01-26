@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         //will get from our database per week
         String[] items = {"Market & Food/Food/Cheese",
