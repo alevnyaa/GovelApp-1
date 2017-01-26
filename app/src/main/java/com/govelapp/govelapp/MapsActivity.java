@@ -29,6 +29,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -52,7 +53,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
@@ -88,6 +89,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         settingsButton = (FloatingActionButton) findViewById(R.id.buttonOptions);
         gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
+        gMapButton.setVisibility(View.GONE);
         mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
 
         // Create an instance of GoogleAPIClient.
@@ -136,6 +138,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(mToolbar);
 
         mToolbar.setTitle(query);
+
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         ActionBar mActionBar = getSupportActionBar();
 
         LocationManagerCheck locationManagerCheck = new LocationManagerCheck(this);
@@ -211,13 +220,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnected(Bundle connectionHint) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
@@ -227,6 +234,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             longitude_cur = mLastLocation.getLongitude();
             LatLng latLng = new LatLng(latitude_cur,longitude_cur);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+        }else{
+            Toast.makeText(MapsActivity.this, "Couldn't get location.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    latitude_cur = mLastLocation.getLatitude();
+                    longitude_cur = mLastLocation.getLongitude();
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 
@@ -251,6 +282,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         selectedMarker = marker;
         latitude = marker.getPosition().latitude;
         longitude = marker.getPosition().longitude;
+        gMapButton.setVisibility(View.VISIBLE);
         slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         ((TextView) findViewById(R.id.shopNameText)).setText(marker.getTitle());
 
@@ -290,6 +322,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        latitude_cur = location.getLatitude();
+        longitude_cur = location.getLongitude();
     }
 
     //url, query, void ---- params[0], params[1], void
@@ -339,6 +377,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
                     || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+                gMapButton.setVisibility(View.GONE);
+                latitude = 0.0;
+                longitude = 0.0;
             }else{
                 Intent backIntent = new Intent(MapsActivity.this, MainActivity.class);
                 startActivity(backIntent);

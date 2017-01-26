@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top"
-    android:background="@color/colorPrimary"
+    android:background="@drawable/background_img"
     android:orientation="vertical"
-    android:paddingTop="80dp"
     android:weightSum="10">
+
 
     <ImageView
         android:id="@+id/ic_launcher"
@@ -16,12 +16,12 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:layout_gravity="top"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="60dp"
         android:adjustViewBounds="false"
         android:contentDescription="@string/govelapp_logo_description"
         android:cropToPadding="false"
         android:elevation="3dp"
-        app:srcCompat="@drawable/ic_splash"
+        app:srcCompat="@drawable/storch_black"
         android:layout_height="170dp" />
 
     <AutoCompleteTextView
@@ -38,11 +38,27 @@
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
         android:textColorHint="@color/cast_expanded_controller_background_color"
-        android:layout_marginTop="23dp"
-        android:layout_below="@+id/ic_launcher"
+        android:layout_marginTop="250dp"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="32dp"
         android:layout_marginLeft="32dp"/>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Storch"
+        android:clickable="false" />
+
+    <ListView
+        android:id="@+id/listview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/toolbar" />
 
 </RelativeLayout>
 
