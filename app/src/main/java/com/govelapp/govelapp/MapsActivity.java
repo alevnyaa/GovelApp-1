@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -18,7 +19,9 @@ import android.support.v4.content.ContextCompat;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +31,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +54,16 @@ import com.govelapp.govelapp.jsonparser.QueryParser;
 import com.govelapp.govelapp.locationmenager.LocationManagerCheck;
 import com.govelapp.govelapp.restclient.RestClient;
 import com.govelapp.govelapp.shopclasses.Shop;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
@@ -87,6 +102,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        query = getIntent().getExtras().getString("query");
+        Log.d("Query", query);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -95,6 +113,57 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
         gMapButton.setVisibility(View.GONE);
         mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
+
+        mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(mToolbar);
+
+        //test purposed
+
+        AccountHeader accountHeader = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.foto_background)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("Kenan Soylu").withEmail("adsasd@gmail.com").withIcon(getResources().getDrawable(R.drawable.black_marker))
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .build();
+
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
+        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
+        SecondaryDrawerItem url = new SecondaryDrawerItem().withIdentifier(3).withName("storchapp.com");
+        SecondaryDrawerItem feedback = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.feedback);
+        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
+        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
+
+        Drawer result = new DrawerBuilder().withAccountHeader(accountHeader)
+                .withActivity(this)
+                .withToolbar(mToolbar)
+                .addDrawerItems(
+                        appName,
+                        new DividerDrawerItem(),
+                        favs,
+                        settings,
+                        feedback,
+                        privacy,
+                        url
+                )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        Toast.makeText(MapsActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
+                        if(position == 7){
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.storchapp.com"));
+                            startActivity(browserIntent);
+                        }
+                        return true;
+                    }
+                })
+                .build();
 
         if(mLastLocation != null){
             mLastLocation.reset();
@@ -109,11 +178,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .build();
         }
 
-        //slidingUpPanelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
-        query = getIntent().getExtras().getString("query");
     }
 
     protected void onStart() {
@@ -125,7 +190,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.disconnect();
         super.onStop();
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -141,9 +205,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         MapStyleOptions style = MapStyleOptions.loadRawResourceStyle(this, R.raw.custom_map);
         mMap.setMapStyle(style);
-
-        mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(mToolbar);
 
         mToolbar.setTitle(query);
 
@@ -202,23 +263,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         showcaseBesiktas();
-    }
-
-
-    //this is for options menu on toolbar
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
     }
 
     @Override

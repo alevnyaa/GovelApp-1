@@ -5,4 +5,9 @@
     <string name="working_hours">Click to see working hours</string>
     <string name="search_bar_hint"> </string>
     <string name="govelapp_logo_description">Storch Logo</string>
+    <string name="favourites">Favourites</string>
+    <string name="settings">Settings</string>
+    <string name="feedback">Feedback</string>
+    <string name="new_place">Add a Place</string>
+    <string name="privacy_policy">Privacy Policy</string>
 </resources>
