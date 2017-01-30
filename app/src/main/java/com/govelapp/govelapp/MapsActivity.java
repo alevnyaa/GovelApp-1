@@ -16,6 +16,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -31,8 +32,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,6 +105,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+       //to make the activity fullscreen
+       /* getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
+
         query = getIntent().getExtras().getString("query");
         Log.d("Query", query);
 
@@ -123,7 +130,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.foto_background)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Kenan Soylu").withEmail("adsasd@gmail.com").withIcon(getResources().getDrawable(R.drawable.black_marker))
+                        new ProfileDrawerItem().withName("Kenan Soylu")
+                                .withEmail("adsasd@gmail.com").withIcon(getResources()
+                                .getDrawable(R.drawable.black_marker))
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -140,7 +149,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        Drawer result = new DrawerBuilder().withAccountHeader(accountHeader)
+        Drawer mDrawer = new DrawerBuilder().withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withToolbar(mToolbar)
                 .addDrawerItems(
@@ -157,7 +166,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         Toast.makeText(MapsActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
                         if(position == 7){
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.storchapp.com"));
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("http://www.storchapp.com"));
                             startActivity(browserIntent);
                         }
                         return true;
@@ -262,6 +272,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                (findViewById(R.id.flexbox_layout)).setVisibility(View.VISIBLE);
+            }
+        });
+
         showcaseBesiktas();
     }
 
@@ -294,8 +311,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    latitude_cur = mLastLocation.getLatitude();
-                    longitude_cur = mLastLocation.getLongitude();
+                    if(mLastLocation != null){
+                        latitude_cur = mLastLocation.getLatitude();
+                        longitude_cur = mLastLocation.getLongitude();
+                    }
                 } else {
 
                     // permission denied, boo! Disable the

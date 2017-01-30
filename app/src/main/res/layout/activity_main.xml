@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top"
-    android:background="@drawable/background_img"
+    android:fitsSystemWindows="true"
+    android:background="@color/colorPrimaryDark"
     android:orientation="vertical"
     android:weightSum="10">
 
@@ -19,7 +20,7 @@
         android:adjustViewBounds="false"
         android:contentDescription="@string/govelapp_logo_description"
         android:cropToPadding="false"
-        android:elevation="3dp"
+        android:elevation="4dp"
         app:srcCompat="@drawable/storch_black"
         android:layout_height="170dp" />
 
@@ -36,7 +37,9 @@
         android:nextFocusLeft="@id/searchBar"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
-        android:textColorHint="@color/cast_expanded_controller_background_color"
+        android:drawableLeft="@drawable/ic_search_black_24dp"
+        android:drawableStart="@drawable/ic_search_black_24dp"
+        android:textColorHint="@color/md_grey_600"
         android:layout_marginTop="250dp"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="32dp"
@@ -46,11 +49,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
+        android:background="@color/colorPrimaryDark"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="Storch"
         android:clickable="false" />
 
     <ListView

@@ -9,7 +9,7 @@
         <item name="colorAccent">@color/wallet_dim_foreground_holo_dark</item>
     </style>
 
-    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="SplashTheme" parent="Theme.AppCompat">
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 

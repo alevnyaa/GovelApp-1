@@ -42,4 +42,5 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.8.1@aar') {
         transitive = true
     }
+    compile 'com.google.android:flexbox:0.3.0-alpha1'
 }
