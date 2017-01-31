@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         new DrawerBuilder().withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withToolbar(mToolbar)
+                .withActionBarDrawerToggleAnimated(true)
                 .addDrawerItems(
                         appName,
                         new DividerDrawerItem(),
@@ -193,33 +194,26 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 doSearch(s);
             }
         });
-
-        //search starter for keyboard
-        searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int i, KeyEvent keyEvent) {
-                String query = searchBar.getText().toString();
-                if (i == EditorInfo.IME_ACTION_SEARCH && query.length() > 0 && isValid(query)) {
-                    doSearch(query);
-                    return true;
-                } else {
-                    Toast.makeText(MainActivity.this, "Invalid search parameters.", Toast.LENGTH_LONG).show();
-                    return false;
-                }
-            }
-        });
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "onOptionsItemSelected: " + item.getItemId());
-        return false;
+        switch (item.getItemId()){
+            case R.id.options:
+                Toast.makeText(MainActivity.this, "Options clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            case  R.id.help:
+                Toast.makeText(MainActivity.this, "Help clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_toolbar_menu, menu);
+        menu.findItem(R.id.search).setVisible(false);
         this.menu = menu;
         return true;
     }

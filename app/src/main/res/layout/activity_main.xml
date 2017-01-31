@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="top"
     android:fitsSystemWindows="true"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
     android:weightSum="10">
 
@@ -21,7 +21,7 @@
         android:contentDescription="@string/govelapp_logo_description"
         android:cropToPadding="false"
         android:elevation="4dp"
-        app:srcCompat="@drawable/storch_black"
+        app:srcCompat="@drawable/ic_splash"
         android:layout_height="170dp" />
 
     <AutoCompleteTextView
@@ -49,7 +49,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorPrimary"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         android:clickable="false" />

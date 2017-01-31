@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:id="@+id/main_frame"
     android:layout_height="match_parent">
 
 <com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -78,35 +79,6 @@ sothree:umanoShadowHeight="4dp">
             android:layout_marginTop="100dp"
             android:src="@android:drawable/ic_menu_preferences"
             app:layout_anchorGravity="top|right|end" />
-
-        <com.google.android.flexbox.FlexboxLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/flexbox_layout"
-            app:layout_anchor="@id/map"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:flexWrap="wrap"
-            app:alignItems="stretch"
-            app:alignContent="stretch" >
-            <CheckBox
-                android:text="CheckBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/checkBox"
-                android:layout_marginTop="80dp"
-                app:layout_alignSelf="flex_start"
-                app:layout_flexBasisPercent="50%" />
-            <CheckBox
-                android:text="CheckBox2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/checkBox2"
-                android:layout_marginTop="80dp"
-                app:layout_alignSelf="flex_start"
-                app:layout_flexBasisPercent="50%" />
-        </com.google.android.flexbox.FlexboxLayout>
     </android.support.design.widget.CoordinatorLayout>
 
     <!--drawer stuff-->

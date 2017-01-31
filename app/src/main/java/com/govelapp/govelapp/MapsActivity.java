@@ -10,6 +10,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -149,8 +150,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        Drawer mDrawer = new DrawerBuilder().withAccountHeader(accountHeader)
+        new DrawerBuilder().withAccountHeader(accountHeader)
                 .withActivity(this)
+                .withActionBarDrawerToggleAnimated(true)
                 .withToolbar(mToolbar)
                 .addDrawerItems(
                         appName,
@@ -275,7 +277,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                (findViewById(R.id.flexbox_layout)).setVisibility(View.VISIBLE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    //test purposed, barely works
+                    getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+                    Drawer d = new DrawerBuilder().withActivity(MapsActivity.this).withRootView(R.id.main_frame).build();
+                    d.openDrawer();
+                }
             }
         });
 
