@@ -104,6 +104,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         //basic setup
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_maps);
 
        //to make the activity fullscreen

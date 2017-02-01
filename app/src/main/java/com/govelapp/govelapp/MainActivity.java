@@ -9,6 +9,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -60,16 +62,21 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private ListView suggestionList;
 
+    private AppCompatButton logInButton, signUpButton;
+
     ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_main);
 
         logo = (ImageView) findViewById(R.id.ic_launcher);
         searchBar = (AutoCompleteTextView) findViewById(R.id.searchBar);
         suggestionList = (ListView) findViewById(R.id.listview);
+        logInButton = (AppCompatButton) findViewById(R.id.btn_login);
+        signUpButton = (AppCompatButton) findViewById(R.id.btn_sign_up);
 
         suggestionList.setVisibility(View.GONE);
 
@@ -156,8 +163,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             public void onFocusChange(View view, boolean b) {
                 if (b) {
                     logo.setVisibility(View.GONE);
-                    //searchBar.setY(250);
+
+                    Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.search_bar_be_toolbar);
+
+                    searchBar.startAnimation(anim);
                     searchBar.setVisibility(View.GONE);
+
+                    signUpButton.setVisibility(View.GONE);
+                    logInButton.setVisibility(View.GONE);
 
                     if (!hasSearchItem) {
                         // Retrieve the SearchView and plug it into SearchManager
@@ -198,16 +211,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.options:
-                Toast.makeText(MainActivity.this, "Options clicked", Toast.LENGTH_SHORT).show();
-                return true;
-            case  R.id.help:
-                Toast.makeText(MainActivity.this, "Help clicked", Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -230,6 +234,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             }else{
                 logo.setVisibility(View.VISIBLE);
                 searchBar.setVisibility(View.VISIBLE);
+                signUpButton.setVisibility(View.VISIBLE);
+                logInButton.setVisibility(View.VISIBLE);
                 searchBar.clearFocus();
             }
             return true;
