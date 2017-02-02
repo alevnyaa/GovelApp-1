@@ -4,6 +4,7 @@
     <string name="url">govelapp.com/api</string>
     <string name="working_hours">Click to see working hours</string>
     <string name="search_bar_hint">Search Nearby...</string>
+    <string name="toolbar_search_hint">What do you need?</string>
     <string name="govelapp_logo_description">Storch Logo</string>
     <string name="favourites">Favourites</string>
     <string name="settings">Settings</string>

@@ -148,12 +148,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
-
-                    /*Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.search_bar_be_toolbar);
-                    logo.setVisibility(View.GONE);
-
-                    searchBar.startAnimation(anim);*/
-
                     Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
                     startActivity(searchIntent);
                     searchBar.clearFocus();

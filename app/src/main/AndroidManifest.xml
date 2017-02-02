@@ -26,6 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
@@ -54,10 +55,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.govelapp.govelapp.MainActivity" />
         </activity>
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/title_activity_search"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.govelapp.govelapp.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

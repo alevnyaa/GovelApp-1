@@ -9,6 +9,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -30,6 +31,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -46,11 +48,12 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             @Override
             public void onClick(View view) {
                 final SearchView searchView = (SearchView) MenuItemCompat
-                        .getActionView(menu.findItem(R.id.search));
+                        .getActionView(menu.findItem(R.id.searchV2));
                 final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-                final MenuItem searchMenuItem = menu.findItem(R.id.search);
+                final MenuItem searchMenuItem = menu.findItem(R.id.searchV2);
                 searchView.setSearchableInfo(searchManager
                         .getSearchableInfo(getComponentName()));
+                searchView.setQueryHint(Html.fromHtml("<font color = #009688>" + getResources().getString(R.string.toolbar_search_hint) + "</font>"));
                 searchMenuItem.expandActionView();
                 searchView.requestFocus();
                 searchView.setOnQueryTextListener(SearchActivity.this);
@@ -61,20 +64,21 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_activity_toolbar_menu, menu);
-        menu.findItem(R.id.search).setVisible(false);
+        getMenuInflater().inflate(R.menu.search_activity_toolbar_menu, menu);
+        menu.findItem(R.id.searchV2).setVisible(false);
         final SearchView searchView = (SearchView) MenuItemCompat
-                .getActionView(menu.findItem(R.id.search));
+                .getActionView(menu.findItem(R.id.searchV2));
         final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        final MenuItem searchMenuItem = menu.findItem(R.id.search);
+        final MenuItem searchMenuItem = menu.findItem(R.id.searchV2);
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getComponentName()));
+        searchView.setQueryHint(Html.fromHtml("<font color = #009688>" + getResources().getString(R.string.toolbar_search_hint) + "</font>"));
         searchMenuItem.expandActionView();
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
         this.menu = menu;
 
-        MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search), new MenuItemCompat.OnActionExpandListener() {
+      /*  MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search), new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 return true;
@@ -84,7 +88,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 return true;
             }
-        });
+        });*/
         return true;
     }
 

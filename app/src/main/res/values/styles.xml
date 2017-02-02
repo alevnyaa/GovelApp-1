@@ -17,8 +17,9 @@
         <item name="android:textColorPrimary">@color/background</item>
     </style>
 
-    <style name="CustomSearctActivityToolbar" parent="ThemeOverlay.AppCompat.ActionBar">
+    <style name="CustomSearctActivityToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/colorPrimary</item>
+        <item name="android:actionMenuTextColor">@color/colorPrimary</item>
     </style>
 
     <style name="AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
