@@ -153,23 +153,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     logo.setVisibility(View.GONE);
 
                     searchBar.startAnimation(anim);*/
-                  /*  searchBar.setVisibility(View.GONE);
-
-                    signUpButton.setVisibility(View.GONE);
-                    logInButton.setVisibility(View.GONE);
-
-                        // Retrieve the SearchView and plug it into SearchManager
-                        final SearchView searchView = (SearchView) MenuItemCompat
-                                .getActionView(menu.findItem(R.id.search));
-                        final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-                        final MenuItem searchMenuItem = menu.findItem(R.id.search);
-                        searchView.setSearchableInfo(searchManager
-                                .getSearchableInfo(getComponentName()));
-                        searchMenuItem.expandActionView();
-                        searchView.requestFocus();
-                        searchView.setOnQueryTextListener(MainActivity.this);
-
-                    mToolbar.setBackgroundColor(getResources().getColor(R.color.background));*/
 
                     Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
                     startActivity(searchIntent);
@@ -177,17 +160,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
             }
         });
-        //writes the text to searchBar
-        searchBar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s = searchBar.getText().toString();
-                searchBar.setText(s);
-                searchBar.setSelection(s.length()); //set the cursor position
-                doSearch(s);
-            }
-        });
-
     }
 
     @Override

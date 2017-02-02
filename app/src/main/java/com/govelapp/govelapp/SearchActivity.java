@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,12 +23,39 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t/&]+");
 
+    private Menu menu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             finish();
+            }
+        });
+
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final SearchView searchView = (SearchView) MenuItemCompat
+                        .getActionView(menu.findItem(R.id.search));
+                final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+                final MenuItem searchMenuItem = menu.findItem(R.id.search);
+                searchView.setSearchableInfo(searchManager
+                        .getSearchableInfo(getComponentName()));
+                searchMenuItem.expandActionView();
+                searchView.requestFocus();
+                searchView.setOnQueryTextListener(SearchActivity.this);
+            }
+        });
 
     }
 
@@ -44,6 +72,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         searchMenuItem.expandActionView();
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
+        this.menu = menu;
 
         MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search), new MenuItemCompat.OnActionExpandListener() {
             @Override
@@ -57,6 +86,15 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             }
         });
         return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
