@@ -1,36 +1,23 @@
 package com.govelapp.govelapp;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.view.animation.Animation.AnimationListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.AccelerateInterpolator;
 
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -56,8 +43,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private Toolbar mToolbar;
 
-    private boolean hasSearchItem = false;
-
     private Menu menu;
 
     private ListView suggestionList;
@@ -81,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         suggestionList.setVisibility(View.GONE);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
 
         //drawer build
@@ -162,17 +148,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
+
+                    /*Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.search_bar_be_toolbar);
                     logo.setVisibility(View.GONE);
 
-                    Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.search_bar_be_toolbar);
-
-                    searchBar.startAnimation(anim);
-                    searchBar.setVisibility(View.GONE);
+                    searchBar.startAnimation(anim);*/
+                  /*  searchBar.setVisibility(View.GONE);
 
                     signUpButton.setVisibility(View.GONE);
                     logInButton.setVisibility(View.GONE);
 
-                    if (!hasSearchItem) {
                         // Retrieve the SearchView and plug it into SearchManager
                         final SearchView searchView = (SearchView) MenuItemCompat
                                 .getActionView(menu.findItem(R.id.search));
@@ -183,17 +168,12 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         searchMenuItem.expandActionView();
                         searchView.requestFocus();
                         searchView.setOnQueryTextListener(MainActivity.this);
-                        hasSearchItem = true;
-                    } else {
-                        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
-                        final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-                        final MenuItem searchMenuItem = menu.findItem(R.id.search);
-                        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-                        searchMenuItem.expandActionView();
-                        searchView.requestFocus();
-                        searchView.setOnQueryTextListener(MainActivity.this);
-                    }
 
+                    mToolbar.setBackgroundColor(getResources().getColor(R.color.background));*/
+
+                    Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+                    startActivity(searchIntent);
+                    searchBar.clearFocus();
                 }
             }
         });
@@ -207,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 doSearch(s);
             }
         });
+
     }
 
     @Override
@@ -218,11 +199,30 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_toolbar_menu, menu);
         menu.findItem(R.id.search).setVisible(false);
+
+        MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search), new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                logo.setVisibility(View.VISIBLE);
+                searchBar.setVisibility(View.VISIBLE);
+                signUpButton.setVisibility(View.VISIBLE);
+                logInButton.setVisibility(View.VISIBLE);
+                mToolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                searchBar.clearFocus();
+                return true;
+            }
+        });
+
         this.menu = menu;
         return true;
     }
 
-    @Override
+  /*  @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.d(TAG, "onKeyDown: " + keyCode);
        if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -236,12 +236,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 searchBar.setVisibility(View.VISIBLE);
                 signUpButton.setVisibility(View.VISIBLE);
                 logInButton.setVisibility(View.VISIBLE);
+                mToolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 searchBar.clearFocus();
             }
             return true;
         }
         return super.onKeyDown(keyCode, event);
-    }
+    }*/
 
     private void doSearch(String query) {
         Intent queryIntent = new Intent(MainActivity.this, MapsActivity.class);

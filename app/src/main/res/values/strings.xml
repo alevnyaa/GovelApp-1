@@ -11,4 +11,5 @@
     <string name="new_place">Add a Place</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="web_site">Web Site</string>
+    <string name="title_activity_search">Search</string>
 </resources>
