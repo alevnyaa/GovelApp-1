@@ -43,7 +43,7 @@ sothree:umanoShadowHeight="4dp">
             android:name="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.govelapp.govelapp.MapsActivity"
+            tools:context="com.storchapp.storch.MapsActivity"
             tools:layout="@layout/activity_maps" /> -->
 
         <android.support.design.widget.FloatingActionButton

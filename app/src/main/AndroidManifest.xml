@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.govelapp.govelapp">
+    package="com.storchapp.storch">
 
     <uses-feature android:name="android.hardware.location.gps" />
 
@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".SplashActivity"
+            android:name="com.storchapp.storch.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,16 +28,14 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.storchapp.storch.MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <!--<intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+
         </activity>
 
         <meta-data
@@ -48,21 +46,24 @@
             android:resource="@xml/searchable" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="com.storchapp.storch.MapsActivity"
             android:label="@string/title_activity_maps"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.govelapp.govelapp.MainActivity" />
+                android:value="com.storchapp.storch.MainActivity" />
         </activity>
 
         <activity
-            android:name=".SearchActivity"
+            android:name="com.storchapp.storch.SearchActivity"
             android:label="@string/title_activity_search"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <meta-data
             android:name="android.support.PARENT_ACTIVITY"
-            android:value="com.govelapp.govelapp.MainActivity" />
+            android:value="com.storchapp.storch.SearchActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
         </activity>
     </application>
 

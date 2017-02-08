@@ -1,4 +1,4 @@
-package com.govelapp.govelapp;
+package com.storchapp.storch;
 
 import android.content.Intent;
 import android.os.Bundle;

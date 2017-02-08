@@ -1,4 +1,4 @@
-package com.govelapp.govelapp.jsonparser;
+package com.storchapp.storch.jsonparser;
 
 /*
 Query
@@ -38,9 +38,8 @@ Details
 
 import android.util.Log;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
-import com.govelapp.govelapp.shopclasses.Shop;
+import com.storchapp.storch.shopclasses.Shop;
 
 import org.json.JSONArray;
 import org.json.JSONException;

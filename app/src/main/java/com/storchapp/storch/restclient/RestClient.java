@@ -1,11 +1,10 @@
-package com.govelapp.govelapp.restclient;
+package com.storchapp.storch.restclient;
 
 import android.net.Uri;
 import android.util.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 
 public class RestClient {
     public static final String TAG = "RestClient";
