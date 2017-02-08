@@ -1,27 +1,27 @@
 {"categories": [ 
-    {"name": "food", "children": [
-      {"name": "snacks", "children": [
-        {"name": "chocolate", "children": [
+    {"id": "1", "name-en": "food", "name-tr": "yemek","children": [
+      {"id": "3", "name-en": "snacks", "name-tr": "atistirmalik", "children": [
+        {"id": "4", "name-en": "chocolate", "name-tr": "cikolata", "children": [
         
         ]},
-        {"name": "cookie", "children": [
+        {"id": "7", "name-en": "cookie", "name-tr": "kurabiye", "children": [
         
         ]}
       ]}
     ]},
-    {"name": "technology", "children": [
-      {"name": "computer", "children": [
+    {"id": "2", "name-en": "technology", "name-tr": "teknoloji", "children": [
+      {"id": "5", "name-en": "computer", "name-tr": "bilgisayar", "children": [
       
       ]},
-      {"name": "television", "children": [
+      {"id": "6", "name-en": "television", "name-tr": "televizyon", "children": [
       
       ]},
-      {"name": "phone", "children": [
+      {"id": "8", "name-en": "phone", "name-tr": "telefon", "children": [
       
       ]}
     ]},
-    {"name": "clothing", "children": [
-      {"name": "tops", "children": [
+    {"id": "9", "name-en": "clothing", "name-tr": "giyim", "children": [
+      {"id": "10", "name-en": "tops", "name-tr": "ust", "children": [
       
       ]}
     ]}
