@@ -1,0 +1,29 @@
+{"categories": [ 
+    {"name": "food", "children": [
+      {"name": "snacks", "children": [
+        {"name": "chocolate", "children": [
+        
+        ]},
+        {"name": "cookie", "children": [
+        
+        ]}
+      ]}
+    ]},
+    {"name": "technology", "children": [
+      {"name": "computer", "children": [
+      
+      ]},
+      {"name": "television", "children": [
+      
+      ]},
+      {"name": "phone", "children": [
+      
+      ]}
+    ]},
+    {"name": "clothing", "children": [
+      {"name": "tops", "children": [
+      
+      ]}
+    ]}
+  ]
+}
