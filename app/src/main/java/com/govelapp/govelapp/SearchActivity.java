@@ -48,9 +48,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             @Override
             public void onClick(View view) {
                 final SearchView searchView = (SearchView) MenuItemCompat
-                        .getActionView(menu.findItem(R.id.searchV2));
+                        .getActionView(menu.findItem(R.id.search));
                 final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-                final MenuItem searchMenuItem = menu.findItem(R.id.searchV2);
+                final MenuItem searchMenuItem = menu.findItem(R.id.search);
                 searchView.setSearchableInfo(searchManager
                         .getSearchableInfo(getComponentName()));
                 searchView.setQueryHint(Html.fromHtml("<font color = #009688>" + getResources().getString(R.string.toolbar_search_hint) + "</font>"));
@@ -65,11 +65,11 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search_activity_toolbar_menu, menu);
-        menu.findItem(R.id.searchV2).setVisible(false);
+        menu.findItem(R.id.search).setVisible(false);
         final SearchView searchView = (SearchView) MenuItemCompat
-                .getActionView(menu.findItem(R.id.searchV2));
+                .getActionView(menu.findItem(R.id.search));
         final SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-        final MenuItem searchMenuItem = menu.findItem(R.id.searchV2);
+        final MenuItem searchMenuItem = menu.findItem(R.id.search);
         searchView.setSearchableInfo(searchManager
                 .getSearchableInfo(getComponentName()));
         searchView.setQueryHint(Html.fromHtml("<font color = #009688>" + getResources().getString(R.string.toolbar_search_hint) + "</font>"));

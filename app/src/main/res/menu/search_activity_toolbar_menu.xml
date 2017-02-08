@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:govelapp="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/searchV2"
+    <item android:id="@+id/search"
         android:title="@string/toolbar_search_hint"
         android:icon="@drawable/ic_search_white_24dp"
         govelapp:showAsAction="collapseActionView|never"
