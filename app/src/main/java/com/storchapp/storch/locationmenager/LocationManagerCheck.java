@@ -1,4 +1,4 @@
-package com.govelapp.govelapp.locationmenager;
+package com.storchapp.storch.locationmenager;
 
 import android.app.Activity;
 import android.content.Context;

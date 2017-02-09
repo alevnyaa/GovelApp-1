@@ -1,4 +1,4 @@
-package com.govelapp.govelapp;
+package com.storchapp.storch;
 
 import android.Manifest;
 import android.app.SearchManager;
@@ -43,10 +43,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.MapFragment;
 
-import com.govelapp.govelapp.jsonparser.QueryParser;
-import com.govelapp.govelapp.locationmenager.LocationManagerCheck;
-import com.govelapp.govelapp.restclient.RestClient;
-import com.govelapp.govelapp.shopclasses.Shop;
+import com.storchapp.storch.jsonparser.QueryParser;
+import com.storchapp.storch.locationmenager.LocationManagerCheck;
+import com.storchapp.storch.restclient.RestClient;
+import com.storchapp.storch.shopclasses.Shop;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;

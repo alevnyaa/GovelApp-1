@@ -1,4 +1,4 @@
-package com.govelapp.govelapp;
+package com.storchapp.storch;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

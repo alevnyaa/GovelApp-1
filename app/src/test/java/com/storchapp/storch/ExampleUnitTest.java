@@ -1,4 +1,4 @@
-package com.govelapp.govelapp;
+package com.storchapp.storch;
 
 import org.junit.Test;
 
