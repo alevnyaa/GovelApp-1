@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -25,6 +26,7 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private Menu menu;
 
     private ListView suggestionList;
+
+    private AccountHeader accountHeader = null;
 
     private AppCompatButton logInButton, signUpButton;
 
@@ -69,20 +73,22 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         setSupportActionBar(mToolbar);
 
         //drawer build
-        AccountHeader accountHeader = new AccountHeaderBuilder()
+        accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.foto_background)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Kenan Soylu")
-                                .withEmail("adsasd@gmail.com").withIcon(getResources()
-                                .getDrawable(R.drawable.black_marker))
-                )
+        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new Google Account").withIdentifier(1))
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 1) {
+                            Intent logIn = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(logIn);
+                        }
                         return false;
                     }
                 })
+                .withSavedInstance(savedInstanceState)
                 .build();
 
         PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
@@ -92,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        new DrawerBuilder().withAccountHeader(accountHeader)
+        DrawerBuilder mdrawer = new DrawerBuilder();
+        mdrawer.withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withToolbar(mToolbar)
                 .withActionBarDrawerToggleAnimated(true)
@@ -104,21 +111,42 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         feedback,
                         privacy,
                         webSite
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
-                        if(position == 7){
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse("http://www.storchapp.com"));
-                            startActivity(browserIntent);
-                        }
-                        return true;
-                    }
-                })
-                .build();
+                ).build();
 
+        mdrawer.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
+                switch(position){
+                    case 1:
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://www.storchapp.com"));
+                        startActivity(browserIntent);
+                        break;
+
+                    case 3:
+                        Intent favs = new Intent(MainActivity.this,FavouritesActivity.class);
+                        startActivity(favs);
+                        break;
+
+                    case 4:
+                        Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(settings);
+                        break;
+
+                    case 5:
+                        Intent feedBack = new Intent(MainActivity.this, FeedbackActivity.class);
+                        startActivity(feedBack);
+                        break;
+
+                    case 6:
+                        Intent privacy = new Intent(MainActivity.this, FeedbackActivity.class);
+                        startActivity(privacy);
+                        break;
+                }
+                return true;
+            }
+        });
 
         //will get from our database per week
         String[] items = {"Market & Food/Food/Cheese",

@@ -112,6 +112,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         Intent queryIntent = new Intent(SearchActivity.this, MapsActivity.class);
         queryIntent.putExtra("query", query);
         startActivity(queryIntent);
+        finish();
     }
 
     //returns true if its a valid query

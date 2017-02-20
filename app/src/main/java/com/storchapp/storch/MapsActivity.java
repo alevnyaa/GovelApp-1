@@ -140,7 +140,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        new DrawerBuilder().withAccountHeader(accountHeader)
+        DrawerBuilder mDrawer = new DrawerBuilder();
+        mDrawer.withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withActionBarDrawerToggleAnimated(true)
                 .withToolbar(mToolbar)
@@ -152,20 +153,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         feedback,
                         privacy,
                         url
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                ).build();
+        mDrawer.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Toast.makeText(MapsActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
-                        if(position == 7){
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse("http://www.storchapp.com"));
-                            startActivity(browserIntent);
+                        switch(position){
+                            case 1:
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.storchapp.com"));
+                                startActivity(browserIntent);
+                                break;
+
+                            case 3:
+                                Intent favs = new Intent(MapsActivity.this,FavouritesActivity.class);
+                                startActivity(favs);
+                                break;
+
+                            case 4:
+                                Intent settings = new Intent(MapsActivity.this, SettingsActivity.class);
+                                startActivity(settings);
+                                break;
+
+                            case 5:
+                                Intent feedBack = new Intent(MapsActivity.this, FeedbackActivity.class);
+                                startActivity(feedBack);
+                                break;
+
+                            case 6:
+                                Intent privacy = new Intent(MapsActivity.this, FeedbackActivity.class);
+                                startActivity(privacy);
+                                break;
                         }
                         return true;
                     }
-                })
-                .build();
+                });
 
         if(mLastLocation != null){
             mLastLocation.reset();
@@ -264,7 +285,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
+       /* settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -274,7 +295,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     d.openDrawer();
                 }
             }
-        });
+        });*/
 
         showcaseBesiktas();
     }
@@ -329,8 +350,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.search_activity_toolbar_menu, menu);
+        getMenuInflater().inflate(R.menu.maps_activity_toolbar_menu, menu);
+        menu.findItem(R.id.search).setVisible(false);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
@@ -390,8 +411,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude_cur = location.getLatitude();
-        longitude_cur = location.getLongitude();
+        if(location.getLatitude() != 0.0 && location.getLongitude() != 0.0){
+            latitude_cur = location.getLatitude();
+            longitude_cur = location.getLongitude();
+        }
     }
 
     @Override
@@ -467,15 +490,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            final MenuItem searchMenuItem = menu.findItem(R.id.search);
             if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
                     || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
                 slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
                 gMapButton.setVisibility(View.GONE);
                 latitude = 0.0;
                 longitude = 0.0;
+            }else if(searchMenuItem.isActionViewExpanded()){
+                searchMenuItem.collapseActionView();
             }else{
-                Intent backIntent = new Intent(MapsActivity.this, MainActivity.class);
-                startActivity(backIntent);
                 finish();
             }
             return true;
