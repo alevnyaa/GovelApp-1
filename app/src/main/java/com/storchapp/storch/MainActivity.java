@@ -1,7 +1,12 @@
 package com.storchapp.storch;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,7 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     public static final String TAG = "MainActivity";
 
     private AutoCompleteTextView searchBar;
@@ -54,6 +59,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     ArrayAdapter<String> adapter;
 
+    private static final int REQUEST_GET_ACCOUNTS = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +70,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         logo = (ImageView) findViewById(R.id.ic_launcher);
         searchBar = (AutoCompleteTextView) findViewById(R.id.searchBar);
-        suggestionList = (ListView) findViewById(R.id.listview);
         logInButton = (AppCompatButton) findViewById(R.id.btn_login);
         signUpButton = (AppCompatButton) findViewById(R.id.btn_sign_up);
-
-        suggestionList.setVisibility(View.GONE);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitle("");
@@ -90,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 })
                 .withSavedInstance(savedInstanceState)
                 .build();
+
 
         PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
         SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
@@ -169,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         adapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, items);
-        suggestionList.setAdapter(adapter);
 
         searchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -181,6 +186,23 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
             }
         });
+
+        logInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent logInIntent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(logInIntent);
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_GET_ACCOUNTS) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            }
+        }
     }
 
     @Override

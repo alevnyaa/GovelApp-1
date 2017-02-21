@@ -11,10 +11,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -31,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -60,8 +65,13 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_CONTACTS;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SearchView.OnQueryTextListener {
@@ -77,7 +87,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private double latitude, longitude, longitude_cur, latitude_cur;
 
-    private Location mLastLocation;
+    private Location mBestLocation;
+    private LocationRequest mLocationRequest;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -85,9 +96,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private FloatingActionButton settingsButton, gMapButton, mLocationButton;
 
-    private Marker selectedMarker;
-
     private Menu menu;
+
+    private static final long ONE_MIN = 1000 * 60;
+    private static final long TWO_MIN = ONE_MIN * 2;
+    private static final long FIVE_MIN = ONE_MIN * 5;
+    private static final long POLLING_FREQ = 1000 * 30;
+    private static final long FASTEST_UPDATE_FREQ = 1000 * 5;
+    private static final float MIN_ACCURACY = 25.0f;
+    private static final float MIN_LAST_READ_ACCURACY = 500.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +113,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_maps);
 
-       //to make the activity fullscreen
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(POLLING_FREQ);
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_FREQ);
+
+        // Create an instance of GoogleAPIClient.
+        if (mGoogleApiClient == null) {
+            // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+            // See https://g.co/AppIndexing/AndroidStudio for more information.
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .addApi(AppIndex.API).build();
+        }
+
+        //to make the activity fullscreen
        /* getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
 
@@ -155,50 +188,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         url
                 ).build();
         mDrawer.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        switch(position){
-                            case 1:
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                        Uri.parse("http://www.storchapp.com"));
-                                startActivity(browserIntent);
-                                break;
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                switch (position) {
+                    case 1:
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://www.storchapp.com"));
+                        startActivity(browserIntent);
+                        break;
 
-                            case 3:
-                                Intent favs = new Intent(MapsActivity.this,FavouritesActivity.class);
-                                startActivity(favs);
-                                break;
+                    case 3:
+                        Intent favs = new Intent(MapsActivity.this, FavouritesActivity.class);
+                        startActivity(favs);
+                        break;
 
-                            case 4:
-                                Intent settings = new Intent(MapsActivity.this, SettingsActivity.class);
-                                startActivity(settings);
-                                break;
+                    case 4:
+                        Intent settings = new Intent(MapsActivity.this, SettingsActivity.class);
+                        startActivity(settings);
+                        break;
 
-                            case 5:
-                                Intent feedBack = new Intent(MapsActivity.this, FeedbackActivity.class);
-                                startActivity(feedBack);
-                                break;
+                    case 5:
+                        Intent feedBack = new Intent(MapsActivity.this, FeedbackActivity.class);
+                        startActivity(feedBack);
+                        break;
 
-                            case 6:
-                                Intent privacy = new Intent(MapsActivity.this, FeedbackActivity.class);
-                                startActivity(privacy);
-                                break;
-                        }
-                        return true;
-                    }
-                });
+                    case 6:
+                        Intent privacy = new Intent(MapsActivity.this, FeedbackActivity.class);
+                        startActivity(privacy);
+                        break;
+                }
+                return true;
+            }
+        });
 
-        if(mLastLocation != null){
-            mLastLocation.reset();
-        }
-
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
+        if (mBestLocation != null) {
+            mBestLocation.reset();
         }
 
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
@@ -207,11 +231,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.start(mGoogleApiClient, getIndexApiAction());
     }
 
     protected void onStop() {
         mGoogleApiClient.disconnect();
-        super.onStop();
+        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
+// See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(mGoogleApiClient, getIndexApiAction());
     }
 
     @Override
@@ -245,9 +274,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (locationManagerCheck.isLocationServiceAvailable()) {
             if (locationManagerCheck.getProviderType() == 1) {
-                   // mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                // mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             } else if (locationManagerCheck.getProviderType() == 2) {
-                 // mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                // mLastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             }
         } else {
             locationManagerCheck.createLocationServiceError(MapsActivity.this);
@@ -266,7 +295,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 if (latitude != 0.0 && longitude != 0.0) {
-                    Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
                             Uri.parse("http://maps.google.com/maps?saddr=" + latitude_cur + ","
                                     + longitude_cur + "&daddr=" + latitude + "," + longitude));
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -280,8 +309,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LatLng latLng = new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+                //TODO: Getting Location works for now but needs update
+                //LatLng latLng = new LatLng(mBestLocation.getLatitude(), mBestLocation.getLongitude());
+                LatLng latLng = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+
             }
         });
 
@@ -300,6 +332,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         showcaseBesiktas();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onConnected(Bundle connectionHint) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -308,35 +341,90 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
-            return;
-        }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-           latitude_cur = mLastLocation.getLatitude();
-            longitude_cur = mLastLocation.getLongitude();
-            LatLng latLng = new LatLng(latitude_cur,longitude_cur);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
-        }else{
-            Toast.makeText(MapsActivity.this, "Couldn't get location.", Toast.LENGTH_SHORT).show();
+            mBestLocation = bestLastKnownLocation(MIN_LAST_READ_ACCURACY, FIVE_MIN);
+
+            if (null == mBestLocation
+                    || mBestLocation.getAccuracy() > MIN_LAST_READ_ACCURACY
+                    || mBestLocation.getTime() < System.currentTimeMillis() - TWO_MIN) {
+
+                // Get the best most recent location currently available
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
+                        (this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this,
+                            Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                        // Show an explanation to the user *asynchronously* -- don't block
+                        // this thread waiting for the user's response! After the user
+                        // sees the explanation, try again to request the permission.
+
+                    } else {
+                        ActivityCompat.requestPermissions(MapsActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    }
+                }
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+
+                // Schedule a runnable to unregister location listeners
+                Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, MapsActivity.this);
+                    }
+
+                }, ONE_MIN, TimeUnit.MILLISECONDS);
+            }
         }
     }
 
+
+    private Location bestLastKnownLocation(float minAccuracy, long minTime) {
+        Location bestResult = null;
+        float bestAccuracy = Float.MAX_VALUE;
+        long bestTime = Long.MIN_VALUE;
+
+        Location mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mCurrentLocation != null) {
+            float accuracy = mCurrentLocation.getAccuracy();
+            long time = mCurrentLocation.getTime();
+
+            if (accuracy < bestAccuracy) {
+                bestResult = mCurrentLocation;
+                bestAccuracy = accuracy;
+                bestTime = time;
+            }
+        }
+
+
+        // Return best reading or null
+        if (bestAccuracy > minAccuracy || bestTime < minTime) {
+            return null;
+        } else {
+            return bestResult;
+        }
+    }
+
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Toast.makeText(MapsActivity.this, "Location permission", Toast.LENGTH_SHORT).show();
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if(mLastLocation != null){
-                        latitude_cur = mLastLocation.getLatitude();
-                        longitude_cur = mLastLocation.getLongitude();
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                    if(mBestLocation != null){
+                        latitude_cur = mBestLocation.getLatitude();
+                        longitude_cur = mBestLocation.getLongitude();
                     }
                 } else {
-
-                    // permission denied, boo! Disable the
+                    // Disable the
                     // functionality that depends on this permission.
+                    mGoogleApiClient.disconnect();
                 }
                 return;
             }
@@ -346,6 +434,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onConnectionSuspended(int i) {
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -363,7 +467,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        selectedMarker = marker;
         latitude = marker.getPosition().latitude;
         longitude = marker.getPosition().longitude;
         gMapButton.setVisibility(View.VISIBLE);
@@ -412,8 +515,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onLocationChanged(Location location) {
         if(location.getLatitude() != 0.0 && location.getLongitude() != 0.0){
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             latitude_cur = location.getLatitude();
             longitude_cur = location.getLongitude();
+            LatLng latLng = new LatLng(latitude_cur,longitude_cur);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
         }
     }
 
@@ -439,6 +545,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Maps Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
     }
 
     //url, query, void ---- params[0], params[1], void
