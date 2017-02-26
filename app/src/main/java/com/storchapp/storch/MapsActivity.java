@@ -178,12 +178,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .withSavedInstance(savedInstanceState)
                 .build();
 
-        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
-        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
-        SecondaryDrawerItem url = new SecondaryDrawerItem().withIdentifier(3).withName("storchapp.com");
-        SecondaryDrawerItem feedback = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.feedback);
-        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
-        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name).withIcon(FontAwesome.Icon.faw_home);
+        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2)
+                .withName(R.string.settings).withIcon(FontAwesome.Icon.faw_optin_monster);
+        SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3)
+                .withName(R.string.web_site).withIcon(FontAwesome.Icon.faw_internet_explorer);
+        SecondaryDrawerItem rateUs = new SecondaryDrawerItem().withIdentifier(4)
+                .withName(R.string.rate_us).withIcon(FontAwesome.Icon.faw_file_text);
+        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5)
+                .withName(R.string.privacy_policy).withIcon(FontAwesome.Icon.faw_lock);
+        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6)
+                .withName(R.string.favourites).withIcon(FontAwesome.Icon.faw_heart);
 
         mDrawer = new DrawerBuilder().withAccountHeader(accountHeader)
                 .withSavedInstance(savedInstanceState)
@@ -195,9 +200,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         new DividerDrawerItem(),
                         favs,
                         settings,
-                        feedback,
+                        rateUs,
                         privacy,
-                        url
+                        webSite
                 ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -217,13 +222,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         break;
 
                     case 5:
-                        Intent feedBack = new Intent(MapsActivity.this, FeedbackActivity.class);
-                        startActivity(feedBack);
+
                         break;
 
                     case 6:
-                        Intent privacy = new Intent(MapsActivity.this, FeedbackActivity.class);
-                        startActivity(privacy);
+
                         break;
 
                     case 7:
@@ -348,11 +351,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //TODO: Getting Location works for now but needs update
                 //LatLng latLng = new LatLng(mBestLocation.getLatitude(), mBestLocation.getLongitude());
                 LatLng latLng = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
-
+                if(latLng != null){
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                }else{
+                    Toast.makeText(MapsActivity.this, "Location not available.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
 
         showcaseBesiktas();
     }

@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private Menu menu;
 
-    private ListView suggestionList;
-
     private AccountHeader accountHeader = null;
 
     private AppCompatButton logInButton, signUpButton;
@@ -68,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
+        //overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_main);
 
         logo = (ImageView) findViewById(R.id.ic_launcher);
@@ -102,13 +100,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 .withSavedInstance(savedInstanceState)
                 .build();
 
-
-        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name).withIcon(FontAwesome.Icon.faw_home);
-        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
-        SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.web_site);
-        SecondaryDrawerItem feedback = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.feedback);
-        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
-        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name)
+                .withIcon(FontAwesome.Icon.faw_home);
+        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2)
+                .withName(R.string.settings).withIcon(FontAwesome.Icon.faw_optin_monster);
+        SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3)
+                .withName(R.string.web_site).withIcon(FontAwesome.Icon.faw_internet_explorer);
+        SecondaryDrawerItem rateUs = new SecondaryDrawerItem().withIdentifier(4)
+                .withName(R.string.rate_us).withIcon(FontAwesome.Icon.faw_file_text);
+        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5)
+                .withName(R.string.privacy_policy).withIcon(FontAwesome.Icon.faw_lock);
+        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6)
+                .withName(R.string.favourites).withIcon(FontAwesome.Icon.faw_heart);
 
         mDrawer = new DrawerBuilder()
                 .withAccountHeader(accountHeader)
@@ -121,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         new DividerDrawerItem(),
                         favs,
                         settings,
-                        feedback,
+                        rateUs,
                         privacy,
                         webSite
                 ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -144,14 +147,13 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                 break;
 
                             case 5:
-                                Intent feedBack = new Intent(MainActivity.this, FeedbackActivity.class);
-                                startActivity(feedBack);
+
                                 break;
 
                             case 6:
-                                Intent privacy = new Intent(MainActivity.this, FeedbackActivity.class);
-                                startActivity(privacy);
+
                                 break;
+
                             case 7:
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                                         Uri.parse("http://www.storchapp.com"));
