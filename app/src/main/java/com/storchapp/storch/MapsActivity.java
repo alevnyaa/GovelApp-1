@@ -26,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -97,6 +98,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FloatingActionButton settingsButton, gMapButton, mLocationButton;
 
     private Menu menu;
+
+    private Drawer mDrawer = null;
+
+    private Drawer rightDrawer = null;
 
     private static final long ONE_MIN = 1000 * 60;
     private static final long TWO_MIN = ONE_MIN * 2;
@@ -173,8 +178,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        DrawerBuilder mDrawer = new DrawerBuilder();
-        mDrawer.withAccountHeader(accountHeader)
+        mDrawer = new DrawerBuilder().withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withActionBarDrawerToggleAnimated(true)
                 .withToolbar(mToolbar)
@@ -186,15 +190,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         feedback,
                         privacy,
                         url
-                ).build();
-        mDrawer.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                 switch (position) {
                     case 1:
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://www.storchapp.com"));
-                        startActivity(browserIntent);
+                        onBackPressed();
                         break;
 
                     case 3:
@@ -216,8 +217,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Intent privacy = new Intent(MapsActivity.this, FeedbackActivity.class);
                         startActivity(privacy);
                         break;
+
+                    case 7:
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://www.storchapp.com"));
+                        startActivity(browserIntent);
+                        break;
+
                 }
                 return true;
+            }
+        }).build();
+
+        rightDrawer = new DrawerBuilder()
+                .withSavedInstance(savedInstanceState)
+                .withActivity(this)
+                .withTranslucentStatusBar(false)
+                .withDisplayBelowStatusBar(true)
+                .addDrawerItems(
+                        new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name),
+                        new DividerDrawerItem(),
+                        new SecondaryDrawerItem().withIdentifier(2).withName("Filter")
+        ).withDrawerGravity(Gravity.END).build();
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rightDrawer.openDrawer();
             }
         });
 
@@ -317,17 +343,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-       /* settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    //test purposed, barely works
-                    getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-                    Drawer d = new DrawerBuilder().withActivity(MapsActivity.this).withRootView(R.id.main_frame).build();
-                    d.openDrawer();
-                }
-            }
-        });*/
 
         showcaseBesiktas();
     }
@@ -608,26 +623,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            final MenuItem searchMenuItem = menu.findItem(R.id.search);
-            if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
-                    || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
-                slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-                gMapButton.setVisibility(View.GONE);
-                latitude = 0.0;
-                longitude = 0.0;
-            }else if(searchMenuItem.isActionViewExpanded()){
-                searchMenuItem.collapseActionView();
-            }else{
-                finish();
-            }
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
+    public void onBackPressed() {
+        final MenuItem searchMenuItem = menu.findItem(R.id.search);
 
+        if (mDrawer != null && mDrawer.isDrawerOpen()) {
+            mDrawer.closeDrawer();
+        }else if(rightDrawer != null && rightDrawer.isDrawerOpen()){
+            rightDrawer.closeDrawer();
+        } else if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
+                || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            gMapButton.setVisibility(View.GONE);
+            latitude = 0.0;
+            longitude = 0.0;
+        }else if(searchMenuItem.isActionViewExpanded()){
+            searchMenuItem.collapseActionView();
+        }else {
+            super.onBackPressed();
+        }
+
+
+    }
 }
 
