@@ -27,9 +27,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -49,6 +47,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.MapFragment;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.materialdrawer.model.ExpandableBadgeDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
+import com.mikepenz.materialdrawer.model.SwitchDrawerItem;
+import com.mikepenz.materialdrawer.model.ToggleDrawerItem;
 import com.storchapp.storch.jsonparser.QueryParser;
 import com.storchapp.storch.locationmenager.LocationManagerCheck;
 import com.storchapp.storch.restclient.RestClient;
@@ -70,9 +73,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.Manifest.permission.READ_CONTACTS;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SearchView.OnQueryTextListener {
@@ -157,18 +157,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         AccountHeader accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
+                .withCompactStyle(true)
                 .withHeaderBackground(R.drawable.foto_background)
                 .addProfiles(
                         new ProfileDrawerItem().withName("Kenan Soylu")
-                                .withEmail("adsasd@gmail.com").withIcon(getResources()
-                                .getDrawable(R.drawable.black_marker))
-                )
+                                .withEmail("adsasd@gmail.com").withIcon(R.drawable.ic_launcher),
+                        new ProfileSettingDrawerItem().withName("Add Account")
+                                .withDescription("Add new Google Account")
+                                .withIcon(FontAwesome.Icon.faw_plus).withIdentifier(1))
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 1) {
+                            Intent logIn = new Intent(MapsActivity.this, LoginActivity.class);
+                            startActivity(logIn);
+                        }
                         return false;
                     }
                 })
+                .withSavedInstance(savedInstanceState)
                 .build();
 
         PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
@@ -179,6 +186,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
         mDrawer = new DrawerBuilder().withAccountHeader(accountHeader)
+                .withSavedInstance(savedInstanceState)
                 .withActivity(this)
                 .withActionBarDrawerToggleAnimated(true)
                 .withToolbar(mToolbar)
@@ -230,14 +238,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }).build();
 
         rightDrawer = new DrawerBuilder()
+                .withDisplayBelowStatusBar(true)
                 .withSavedInstance(savedInstanceState)
                 .withActivity(this)
-                .withTranslucentStatusBar(false)
-                .withDisplayBelowStatusBar(true)
                 .addDrawerItems(
                         new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withIdentifier(2).withName("Filter")
+                        new ExpandableBadgeDrawerItem().withName(R.string.settings).withSelectable(false).withSubItems(
+                                new SwitchDrawerItem().withName("Show only nearest").withIcon(FontAwesome.Icon.faw_location_arrow),
+                                new SwitchDrawerItem().withName("Pins").withIcon(FontAwesome.Icon.faw_map_pin)
+                                )
         ).withDrawerGravity(Gravity.END).build();
 
         settingsButton.setOnClickListener(new View.OnClickListener() {
