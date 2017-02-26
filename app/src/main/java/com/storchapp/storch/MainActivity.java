@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -61,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private static final int REQUEST_GET_ACCOUNTS = 0;
 
+    private Drawer mDrawer = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,11 +83,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         //drawer build
         accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
-                .withHeaderBackground(R.drawable.foto_background)
+                .withCompactStyle(true)
+                .withHeaderBackground(R.color.colorPrimary)
                 .addProfiles(
-        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new Google Account").withIdentifier(1))
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
+                        new ProfileSettingDrawerItem().withName("Add Account")
+                                .withDescription("Add new Google Account")
+                                .withIcon(FontAwesome.Icon.faw_plus).withIdentifier(1))
+                    .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                        @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
                         if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 1) {
                             Intent logIn = new Intent(MainActivity.this, LoginActivity.class);
@@ -97,17 +103,18 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 .build();
 
 
-        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name).withIcon(FontAwesome.Icon.faw_home);
         SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
         SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.web_site);
         SecondaryDrawerItem feedback = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.feedback);
         SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
         SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
 
-        DrawerBuilder mdrawer = new DrawerBuilder();
-        mdrawer.withAccountHeader(accountHeader)
+        mDrawer = new DrawerBuilder()
+                .withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withToolbar(mToolbar)
+                .withSavedInstance(savedInstanceState)
                 .withActionBarDrawerToggleAnimated(true)
                 .addDrawerItems(
                         appName,
@@ -117,42 +124,43 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         feedback,
                         privacy,
                         webSite
-                ).build();
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
+                        switch (position) {
+                            case 1:
+                                onBackPressed();
+                                break;
 
-        mdrawer.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
-                switch(position){
-                    case 1:
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://www.storchapp.com"));
-                        startActivity(browserIntent);
-                        break;
+                            case 3:
+                                Intent favs = new Intent(MainActivity.this, FavouritesActivity.class);
+                                startActivity(favs);
+                                break;
 
-                    case 3:
-                        Intent favs = new Intent(MainActivity.this,FavouritesActivity.class);
-                        startActivity(favs);
-                        break;
+                            case 4:
+                                Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
+                                startActivity(settings);
+                                break;
 
-                    case 4:
-                        Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
-                        startActivity(settings);
-                        break;
+                            case 5:
+                                Intent feedBack = new Intent(MainActivity.this, FeedbackActivity.class);
+                                startActivity(feedBack);
+                                break;
 
-                    case 5:
-                        Intent feedBack = new Intent(MainActivity.this, FeedbackActivity.class);
-                        startActivity(feedBack);
-                        break;
-
-                    case 6:
-                        Intent privacy = new Intent(MainActivity.this, FeedbackActivity.class);
-                        startActivity(privacy);
-                        break;
-                }
-                return true;
-            }
-        });
+                            case 6:
+                                Intent privacy = new Intent(MainActivity.this, FeedbackActivity.class);
+                                startActivity(privacy);
+                                break;
+                            case 7:
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.storchapp.com"));
+                                startActivity(browserIntent);
+                                break;
+                        }
+                        return false;
+                    }
+                }).build();
 
         //will get from our database per week
         String[] items = {"Market & Food/Food/Cheese",
@@ -197,6 +205,16 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     @Override
+    public void onBackPressed() {
+        if (mDrawer != null && mDrawer.isDrawerOpen()) {
+            mDrawer.closeDrawer();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_GET_ACCOUNTS) {
@@ -237,27 +255,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return true;
     }
 
-  /*  @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onKeyDown: " + keyCode);
-       if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if(logo.isShown()){
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }else{
-                logo.setVisibility(View.VISIBLE);
-                searchBar.setVisibility(View.VISIBLE);
-                signUpButton.setVisibility(View.VISIBLE);
-                logInButton.setVisibility(View.VISIBLE);
-                mToolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                searchBar.clearFocus();
-            }
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }*/
 
     private void doSearch(String query) {
         Intent queryIntent = new Intent(MainActivity.this, MapsActivity.class);
