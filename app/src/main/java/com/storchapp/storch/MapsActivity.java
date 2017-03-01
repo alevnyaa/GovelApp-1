@@ -25,6 +25,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -33,6 +37,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -67,6 +72,7 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -75,7 +81,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, SearchView.OnQueryTextListener {
+        GoogleMap.OnMarkerClickListener, GoogleApiClient.ConnectionCallbacks,
+        OnConnectionFailedListener, LocationListener,
+        SearchView.OnQueryTextListener {
     //our valid characters OnMapReadyCallback
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
@@ -87,6 +95,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Toolbar mToolbar;
 
     private double latitude, longitude, longitude_cur, latitude_cur;
+
+    private Marker marker;
 
     private Location mBestLocation;
     private LocationRequest mLocationRequest;
@@ -265,6 +275,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+
+        slidingLayout.addPanelSlideListener(new PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+
+            }
+
+            @Override
+            public void onPanelStateChanged(View panel,
+                                            SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                if(newState == SlidingUpPanelLayout.PanelState.DRAGGING &&
+                        previousState == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                    String a = marker.getSnippet();
+                    SpannableString ss = new SpannableString(a);
+                    ss.setSpan(new RelativeSizeSpan(0.5f), 0,5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ((TextView) findViewById(R.id.shopNameText)).setText("\t\t\t\t"
+                            + marker.getTitle() + "\n" + "\t" + ss);
+                }
+                if(previousState == SlidingUpPanelLayout.PanelState.EXPANDED &&
+                        newState == SlidingUpPanelLayout.PanelState.DRAGGING){
+                    ((TextView) findViewById(R.id.shopNameText)).setText(marker.getTitle());
+                }
+            }
+        });
     }
 
     protected void onStart() {
@@ -372,6 +406,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
             mBestLocation = bestLastKnownLocation(MIN_LAST_READ_ACCURACY, FIVE_MIN);
+            mBestLocation = bestLastKnownLocation(MIN_LAST_READ_ACCURACY, FIVE_MIN);
 
             if (null == mBestLocation
                     || mBestLocation.getAccuracy() > MIN_LAST_READ_ACCURACY
@@ -410,7 +445,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+  //TODO:must be updated
     private Location bestLastKnownLocation(float minAccuracy, long minTime) {
         Location bestResult = null;
         float bestAccuracy = Float.MAX_VALUE;
@@ -437,7 +472,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
+ //TODO:need permission
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         Toast.makeText(MapsActivity.this, "Location permission", Toast.LENGTH_SHORT).show();
@@ -497,6 +532,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        this.marker = marker;
         latitude = marker.getPosition().latitude;
         longitude = marker.getPosition().longitude;
         gMapButton.setVisibility(View.VISIBLE);
@@ -506,7 +542,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //   showDrawer(marker);
         return false;
     }
-
 
     private void showcaseBesiktas() {
         String showcasePlaces[][] = {
@@ -650,8 +685,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
             slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
             gMapButton.setVisibility(View.GONE);
-            latitude = 0.0;
-            longitude = 0.0;
         }else if(searchMenuItem.isActionViewExpanded()){
             searchMenuItem.collapseActionView();
         }else {

@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private Drawer mDrawer = null;
 
-
+    //TODO: Make this slidable
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
                         switch (position) {
                             case 1:
                                 onBackPressed();
