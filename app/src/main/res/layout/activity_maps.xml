@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/tools"
     android:id="@+id/main_frame"
     android:layout_height="match_parent">
 
@@ -107,19 +108,29 @@ sothree:umanoShadowHeight="4dp">
                 android:gravity="center_vertical"
                 android:paddingLeft="10dp"
                 android:textSize="25sp" />
-
-            <TextView
-                android:id="@+id/shopTypeText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@color/background"
-                android:gravity="center"
-                android:paddingLeft="15dp"
-                android:textSize="15sp"/>
-
         </LinearLayout>
 
-        <LinearLayout
+<android.support.design.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </android.support.design.widget.AppBarLayout>
+
+</android.support.design.widget.CoordinatorLayout>
+
+
+        <!--<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end"
@@ -152,7 +163,7 @@ sothree:umanoShadowHeight="4dp">
                 android:layout_margin="10dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/img" />
-        </LinearLayout>
+        </LinearLayout>-->
     </LinearLayout>
 
 

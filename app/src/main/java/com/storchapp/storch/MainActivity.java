@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private Drawer mDrawer = null;
 
-    //TODO: Make this slidable
+    //TODO: Make the whole activity slidable
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

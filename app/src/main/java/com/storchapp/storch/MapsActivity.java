@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -28,6 +30,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
 import android.view.Gravity;
@@ -92,6 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String query;
 
     private SlidingUpPanelLayout slidingLayout;
+    private TabLayout mTabLayout;
     private Toolbar mToolbar;
 
     private double latitude, longitude, longitude_cur, latitude_cur;
@@ -112,6 +117,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Drawer mDrawer = null;
 
     private Drawer rightDrawer = null;
+
+    private TextView slidingDrawerTextView;
 
     private static final long ONE_MIN = 1000 * 60;
     private static final long TWO_MIN = ONE_MIN * 2;
@@ -159,9 +166,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         gMapButton = (FloatingActionButton) findViewById(R.id.buttonDirection);
         gMapButton.setVisibility(View.GONE);
         mLocationButton = (FloatingActionButton) findViewById(R.id.buttonMyLocation);
+        slidingDrawerTextView = (TextView) findViewById(R.id.shopNameText);
+        mTabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
+
+        mTabLayout.addTab(mTabLayout.newTab().setText("Info"));
+        mTabLayout.addTab(mTabLayout.newTab().setText("Search in Store"));
+
 
         //test purposed
 
@@ -274,8 +288,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mBestLocation.reset();
         }
 
-        slidingLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
         slidingLayout.addPanelSlideListener(new PanelSlideListener() {
             @Override
             public void onPanelSlide(View panel, float slideOffset) {
@@ -284,18 +296,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onPanelStateChanged(View panel,
-                                            SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                if(newState == SlidingUpPanelLayout.PanelState.DRAGGING &&
-                        previousState == SlidingUpPanelLayout.PanelState.COLLAPSED){
-                    String a = marker.getSnippet();
-                    SpannableString ss = new SpannableString(a);
-                    ss.setSpan(new RelativeSizeSpan(0.5f), 0,5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ((TextView) findViewById(R.id.shopNameText)).setText("\t\t\t\t"
-                            + marker.getTitle() + "\n" + "\t" + ss);
+                                            SlidingUpPanelLayout.PanelState previousState,
+                                            SlidingUpPanelLayout.PanelState newState) {
+                if(newState == SlidingUpPanelLayout.PanelState.EXPANDED &&
+                        previousState == SlidingUpPanelLayout.PanelState.DRAGGING){
+                    //TODO:Make this work
+                    SpannableString ss = new SpannableString(marker.getSnippet().toString());
+                    ss.setSpan(new RelativeSizeSpan(0.6f), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ss.setSpan(new ForegroundColorSpan(Color.BLUE), 0, ss.length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);// set color
+                    slidingDrawerTextView.setText(marker.getTitle()+"\n"+ss);
                 }
-                if(previousState == SlidingUpPanelLayout.PanelState.EXPANDED &&
-                        newState == SlidingUpPanelLayout.PanelState.DRAGGING){
-                    ((TextView) findViewById(R.id.shopNameText)).setText(marker.getTitle());
+                if(previousState == SlidingUpPanelLayout.PanelState.DRAGGING &&
+                        newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
+                    slidingDrawerTextView.setText(marker.getTitle());
                 }
             }
         });
@@ -445,7 +459,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-  //TODO:must be updated
+  //TODO:must be updated to get last known locattion of the user
     private Location bestLastKnownLocation(float minAccuracy, long minTime) {
         Location bestResult = null;
         float bestAccuracy = Float.MAX_VALUE;
@@ -681,17 +695,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mDrawer.closeDrawer();
         }else if(rightDrawer != null && rightDrawer.isDrawerOpen()){
             rightDrawer.closeDrawer();
-        } else if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED
-                || slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED){
-            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-            gMapButton.setVisibility(View.GONE);
+        } else if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED){
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }else if(searchMenuItem.isActionViewExpanded()){
             searchMenuItem.collapseActionView();
-        }else {
-            super.onBackPressed();
+        }else if(slidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+            slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+            gMapButton.setVisibility(View.GONE);
+        }else{
+                super.onBackPressed();
+            }
         }
 
 
     }
-}
+
 
