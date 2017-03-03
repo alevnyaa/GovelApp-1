@@ -33,8 +33,8 @@ public class Category {
     }
     //TODO:complete throw thing
 
-    private class CategoryBuilderError extends Exception{
-        private CategoryBuilderError(String msg){
+    public class CategoryBuilderError extends Exception{
+        public CategoryBuilderError(String msg){
             super(msg);
         }
     }
