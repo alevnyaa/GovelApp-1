@@ -24,12 +24,15 @@ import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import android.support.v4.view.*;
+import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
@@ -173,9 +176,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(mToolbar);
 
+        //set tabLayout functionality
         mTabLayout.addTab(mTabLayout.newTab().setText("Info"));
         mTabLayout.addTab(mTabLayout.newTab().setText("Search in Store"));
+        mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
+        final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        final android.support.v4.view.PagerAdapter mPagerAdapter =
+                new com.storchapp.storch.PagerAdapter(getSupportFragmentManager(),mTabLayout.getTabCount());
+        mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+        mTabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener(){
+
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Log.d("tab switch", tab.toString());
+                mViewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         //test purposed
 
@@ -202,7 +230,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .withSavedInstance(savedInstanceState)
                 .build();
 
-        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name).withIcon(FontAwesome.Icon.faw_home);
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1)
+                .withName(R.string.app_name).withIcon(FontAwesome.Icon.faw_home);
         SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2)
                 .withName(R.string.settings).withIcon(FontAwesome.Icon.faw_optin_monster);
         SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3)
@@ -271,9 +300,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addDrawerItems(
                         new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name),
                         new DividerDrawerItem(),
-                        new ExpandableBadgeDrawerItem().withName(R.string.settings).withSelectable(false).withSubItems(
-                                new SwitchDrawerItem().withName("Show only nearest").withIcon(FontAwesome.Icon.faw_location_arrow),
-                                new SwitchDrawerItem().withName("Pins").withIcon(FontAwesome.Icon.faw_map_pin)
+                        new ExpandableBadgeDrawerItem().withName(R.string.settings).withSelectable(false)
+                                .withSubItems(
+                                new SwitchDrawerItem().withName("Show only nearest")
+                                        .withIcon(FontAwesome.Icon.faw_location_arrow),
+                                new SwitchDrawerItem().withName("Pins")
+                                        .withIcon(FontAwesome.Icon.faw_map_pin)
                                 )
         ).withDrawerGravity(Gravity.END).build();
 
@@ -300,14 +332,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             SlidingUpPanelLayout.PanelState newState) {
                 if(newState == SlidingUpPanelLayout.PanelState.EXPANDED &&
                         previousState == SlidingUpPanelLayout.PanelState.DRAGGING){
-                    //TODO:Make this work
-                    SpannableString ss = new SpannableString(marker.getSnippet().toString());
-                    ss.setSpan(new RelativeSizeSpan(0.6f), 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ss.setSpan(new ForegroundColorSpan(Color.BLUE), 0, ss.length(),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);// set color
-                    slidingDrawerTextView.setText(marker.getTitle()+"\n"+ss);
-                }
-                if(previousState == SlidingUpPanelLayout.PanelState.DRAGGING &&
+                    SpannableStringBuilder ss = new SpannableStringBuilder();
+                    Spannable snippet = new SpannableString(marker.getSnippet());
+                    snippet.setSpan(new ForegroundColorSpan(Color.BLACK),0
+                            ,snippet.length(),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ss.append(marker.getTitle());
+                    ss.append("\n");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        ss.append(snippet, new RelativeSizeSpan(0.6f),Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    }else{
+                        ss.append(snippet);
+                    }
+                    slidingDrawerTextView.setText(ss);
+                }else if(previousState == SlidingUpPanelLayout.PanelState.DRAGGING &&
                         newState == SlidingUpPanelLayout.PanelState.COLLAPSED){
                     slidingDrawerTextView.setText(marker.getTitle());
                 }
@@ -398,7 +435,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 //TODO: Getting Location works for now but needs update
                 //LatLng latLng = new LatLng(mBestLocation.getLatitude(), mBestLocation.getLongitude());
-                LatLng latLng = new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude());
+                LatLng latLng = new LatLng(mMap.getMyLocation()
+                        .getLatitude(), mMap.getMyLocation().getLongitude());
                 if(latLng != null){
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
                 }else{
@@ -413,7 +451,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -444,14 +485,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
                     }
                 }
-                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                LocationServices.FusedLocationApi
+                        .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
                 // Schedule a runnable to unregister location listeners
                 Executors.newScheduledThreadPool(1).schedule(new Runnable() {
 
                     @Override
                     public void run() {
-                        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, MapsActivity.this);
+                        LocationServices.FusedLocationApi
+                                .removeLocationUpdates(mGoogleApiClient, MapsActivity.this);
                     }
 
                 }, ONE_MIN, TimeUnit.MILLISECONDS);
@@ -495,7 +538,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                    LocationServices.FusedLocationApi
+                            .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
                     if(mBestLocation != null){
                         latitude_cur = mBestLocation.getLatitude();
                         longitude_cur = mBestLocation.getLongitude();
@@ -706,8 +750,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 super.onBackPressed();
             }
         }
-
-
     }
 
 
