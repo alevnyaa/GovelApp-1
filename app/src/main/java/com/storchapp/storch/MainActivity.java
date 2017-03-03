@@ -1,12 +1,9 @@
 package com.storchapp.storch;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,23 +17,30 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         super.onCreate(savedInstanceState);
         //overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_main);
+
 
         logo = (ImageView) findViewById(R.id.ic_launcher);
         searchBar = (AutoCompleteTextView) findViewById(R.id.searchBar);
@@ -203,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 startActivity(logInIntent);
             }
         });
+        clientConnect("https://95.85.27.32/users/");
     }
 
     @Override
@@ -254,6 +260,33 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         this.menu = menu;
         return true;
+    }
+
+    private void clientConnect(String url){
+        JSONObject responseJSON;
+        try{
+            URL mUrl = new URL(url);
+            HttpURLConnection urlConnection = (HttpURLConnection) mUrl.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in,"UTF-8"));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            String inputStr;
+
+            while((inputStr=bufferedReader.readLine()) != null){
+                stringBuilder.append(inputStr);
+            }
+
+            try{
+                responseJSON = new JSONObject(stringBuilder.toString());
+            }catch (JSONException e){
+                Log.d(TAG, e.toString());
+            }
+            }catch (Exception e){
+            Toast.makeText(this, "Couldn't connect", Toast.LENGTH_LONG).show();
+            Log.d(TAG, e.toString());
+        }
+
     }
 
 

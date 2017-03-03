@@ -10,4 +10,9 @@
         android:text="search tab"
         android:textSize="50dp" />
 
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/borders_for_text_view"/>
+
 </RelativeLayout>

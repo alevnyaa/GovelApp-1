@@ -190,7 +190,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                Log.d("tab switch", tab.toString());
                 mViewPager.setCurrentItem(tab.getPosition());
             }
 
