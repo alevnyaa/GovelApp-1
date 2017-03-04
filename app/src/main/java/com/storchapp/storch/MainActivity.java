@@ -286,9 +286,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             Toast.makeText(this, "Couldn't connect", Toast.LENGTH_LONG).show();
             Log.d(TAG, e.toString());
         }
-
     }
-
 
     private void doSearch(String query) {
         Intent queryIntent = new Intent(MainActivity.this, MapsActivity.class);

@@ -15,13 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static java.lang.Integer.parseInt;
-
-
 public class CategoryParser {
     public static final String TAG = "CategoryParser";
 
-    public static void parseCategoryList(String jsonString){
+    public void parseCategoryList(String jsonString){
         List<Category> categoryList = new ArrayList<>();
         try {
             JSONArray categoriesJSON = new JSONArray(jsonString);
@@ -29,36 +26,42 @@ public class CategoryParser {
             for (int i=0; i< categoriesJSON.length(); i++){
                 JSONObject categoryJSON = categoriesJSON.getJSONObject(i);
 
-                //should this be changed for a builder pattern instead of javabean pattern?
-                Category cat = new Category();
-
-                try {
-                    cat.setId(categoryJSON.getInt("id"));
-                    cat.setName_en(categoryJSON.getString("name_en"));
-                    cat.setName_tr(categoryJSON.getString("name_tr"));
-                    cat.setParent(categoryJSON.getInt("parent"));
-
-                    String storeString = categoryJSON.getString("stores");
-
-                    List<Integer> storeIDsInt = new ArrayList<>();
-
-                    String[] storeIDString = storeString.split(Pattern.quote(","));
-
-                    for(String s: storeIDString){
-                        storeIDsInt.add(Integer.parseInt(s));
-                    }
-
-                    cat.setStoreIDList(storeIDsInt);
-
-                    cat.addToCategories();
-
-                }catch (Category.CategoryBuilderError e){
-                    Log.d(TAG, "parseCategoryList: " + e);
-                }
-
+                parseCategory(categoryJSON).addToCategories();
             }
         } catch (JSONException e) {
             Log.d(TAG, "error: can't parse json");
         }
+    }
+
+    public Category parseCategory(JSONObject categoryJSON){
+        //should this be changed for a builder pattern instead of javabean pattern?
+        Category cat = new Category();
+
+        try {
+            cat.setId(categoryJSON.getInt("id"));
+            cat.setName_en(categoryJSON.getString("name_en"));
+            cat.setName_tr(categoryJSON.getString("name_tr"));
+            cat.setParent(categoryJSON.getInt("parent"));
+
+            String storeString = categoryJSON.getString("stores");
+
+            List<Integer> storeIDsInt = new ArrayList<>();
+
+            String[] storeIDString = storeString.split(Pattern.quote(","));
+
+            for(String s: storeIDString){
+                storeIDsInt.add(Integer.parseInt(s));
+            }
+
+            cat.setStoreIDList(storeIDsInt);
+
+            return cat;
+
+        }catch (Category.CategoryBuilderError e){
+            Log.d(TAG, "parseCategoryList: " + e);
+        }catch (JSONException e){
+            Log.d(TAG, "parseCategoryList: " + e);
+        }
+        return null;
     }
 }
