@@ -24,6 +24,10 @@ public class Category {
     }
 
 
+    public void addToCategories(){
+        categories.put(getId(), this);
+    }
+
     public Category getParentCat(){
       return categories.get(Integer.valueOf(id));
     }

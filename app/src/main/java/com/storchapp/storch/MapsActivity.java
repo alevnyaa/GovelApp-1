@@ -178,7 +178,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //set tabLayout functionality
         mTabLayout.addTab(mTabLayout.newTab().setText("Info"));
-        mTabLayout.addTab(mTabLayout.newTab().setText("Search in Store"));
+        mTabLayout.addTab(mTabLayout.newTab().setText("Photos"));
+        mTabLayout.addTab(mTabLayout.newTab().setText("Products"));
         mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);

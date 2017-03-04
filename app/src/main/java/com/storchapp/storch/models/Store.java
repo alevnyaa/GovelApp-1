@@ -29,7 +29,9 @@ public class Store {
     }
 
     private class storeBuilderError extends Exception {
-
+        public storeBuilderError(String msg){
+            super(msg);
+        }
     }
     //TODO:complete throw thing
 
@@ -49,32 +51,48 @@ public class Store {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int id) throws storeBuilderError {
+        if(id < 1){
+            throw new storeBuilderError("ID can't be less than 1.");
+        }else{
+            this.id = id;
+        }
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name)throws storeBuilderError {
+        if(name.isEmpty()){
+            throw new storeBuilderError("Store name can't be empty.");
+        }else{
+            this.name = name;
+        }
     }
 
     public LatLng getPosition() {
         return position;
     }
 
-    public void setPosition(LatLng position) {
-        this.position = position;
+    public void setPosition(LatLng position) throws storeBuilderError{
+        if(position == null){
+            throw new storeBuilderError("Position can't be empty.");
+        }else{
+            this.position = position;
+        }
     }
 
     public String getInfo() {
         return info;
     }
 
-    public void setInfo(String info) {
-        this.info = info;
+    public void setInfo(String info)throws storeBuilderError {
+        if(info.isEmpty()){
+            throw new storeBuilderError("Store Info can't be empty");
+        }else{
+            this.info = info;
+        }
     }
 
     public BitmapDescriptor getIcon() {

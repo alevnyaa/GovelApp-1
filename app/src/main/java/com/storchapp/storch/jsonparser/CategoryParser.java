@@ -11,13 +11,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import static java.lang.Integer.parseInt;
 
 
 public class CategoryParser {
     public static final String TAG = "CategoryParser";
 
-    public static List<Category> parseCategoryList(String jsonString){
+    public static void parseCategoryList(String jsonString){
         List<Category> categoryList = new ArrayList<>();
         try {
             JSONArray categoriesJSON = new JSONArray(jsonString);
@@ -36,23 +40,25 @@ public class CategoryParser {
 
                     String storeString = categoryJSON.getString("stores");
 
-                    int len = 1;
-                    for(int j = 0; j < storeString.length(); j++){
-                        if(storeString.charAt(j) == ',')
-                            len++;
+                    List<Integer> storeIDsInt = new ArrayList<>();
+
+                    String[] storeIDString = storeString.split(Pattern.quote(","));
+
+                    for(String s: storeIDString){
+                        storeIDsInt.add(Integer.parseInt(s));
                     }
-                    int[] storeids = new int[len];
+
+                    cat.setStoreIDList(storeIDsInt);
+
+                    cat.addToCategories();
 
                 }catch (Category.CategoryBuilderError e){
                     Log.d(TAG, "parseCategoryList: " + e);
                 }
 
-
-
             }
         } catch (JSONException e) {
             Log.d(TAG, "error: can't parse json");
         }
-        return categoryList;
     }
 }
