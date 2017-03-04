@@ -1,7 +1,9 @@
 package com.storchapp.storch;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,25 +17,35 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     public static final String TAG = "MainActivity";
 
     private AutoCompleteTextView searchBar;
@@ -44,81 +56,117 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     private Menu menu;
 
-    private ListView suggestionList;
+    private AccountHeader accountHeader = null;
 
     private AppCompatButton logInButton, signUpButton;
 
     ArrayAdapter<String> adapter;
 
+    private static final int REQUEST_GET_ACCOUNTS = 0;
+
+    private Drawer mDrawer = null;
+
+    //TODO: Make the whole activity slidable
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
+        //overridePendingTransition(R.anim.drawer_close, R.anim.drawer_open);
         setContentView(R.layout.activity_main);
+
 
         logo = (ImageView) findViewById(R.id.ic_launcher);
         searchBar = (AutoCompleteTextView) findViewById(R.id.searchBar);
-        suggestionList = (ListView) findViewById(R.id.listview);
         logInButton = (AppCompatButton) findViewById(R.id.btn_login);
         signUpButton = (AppCompatButton) findViewById(R.id.btn_sign_up);
-
-        suggestionList.setVisibility(View.GONE);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitle("");
         setSupportActionBar(mToolbar);
 
         //drawer build
-        AccountHeader accountHeader = new AccountHeaderBuilder()
+        accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
-                .withHeaderBackground(R.drawable.foto_background)
+                .withCompactStyle(true)
+                .withHeaderBackground(R.color.colorPrimary)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Kenan Soylu")
-                                .withEmail("adsasd@gmail.com").withIcon(getResources()
-                                .getDrawable(R.drawable.black_marker))
-                )
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
+                        new ProfileSettingDrawerItem().withName("Add Account")
+                                .withDescription("Add new Google Account")
+                                .withIcon(FontAwesome.Icon.faw_plus).withIdentifier(1))
+                    .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                        @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        if (profile instanceof IDrawerItem && ((IDrawerItem) profile).getIdentifier() == 1) {
+                            Intent logIn = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(logIn);
+                        }
                         return false;
                     }
                 })
+                .withSavedInstance(savedInstanceState)
                 .build();
 
-        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name);
-        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2).withName(R.string.settings);
-        SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3).withName(R.string.web_site);
-        SecondaryDrawerItem feedback = new SecondaryDrawerItem().withIdentifier(4).withName(R.string.feedback);
-        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5).withName(R.string.privacy_policy);
-        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6).withName(R.string.favourites);
+        PrimaryDrawerItem appName = new PrimaryDrawerItem().withIdentifier(1).withName(R.string.app_name)
+                .withIcon(FontAwesome.Icon.faw_home);
+        SecondaryDrawerItem settings = new SecondaryDrawerItem().withIdentifier(2)
+                .withName(R.string.settings).withIcon(FontAwesome.Icon.faw_optin_monster);
+        SecondaryDrawerItem webSite = new SecondaryDrawerItem().withIdentifier(3)
+                .withName(R.string.web_site).withIcon(FontAwesome.Icon.faw_internet_explorer);
+        SecondaryDrawerItem rateUs = new SecondaryDrawerItem().withIdentifier(4)
+                .withName(R.string.rate_us).withIcon(FontAwesome.Icon.faw_file_text);
+        SecondaryDrawerItem privacy = new SecondaryDrawerItem().withIdentifier(5)
+                .withName(R.string.privacy_policy).withIcon(FontAwesome.Icon.faw_lock);
+        SecondaryDrawerItem favs = new SecondaryDrawerItem().withIdentifier(6)
+                .withName(R.string.favourites).withIcon(FontAwesome.Icon.faw_heart);
 
-        new DrawerBuilder().withAccountHeader(accountHeader)
+        mDrawer = new DrawerBuilder()
+                .withAccountHeader(accountHeader)
                 .withActivity(this)
                 .withToolbar(mToolbar)
+                .withSavedInstance(savedInstanceState)
                 .withActionBarDrawerToggleAnimated(true)
                 .addDrawerItems(
                         appName,
                         new DividerDrawerItem(),
                         favs,
                         settings,
-                        feedback,
+                        rateUs,
                         privacy,
                         webSite
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Toast.makeText(MainActivity.this, "Item pressed " + position, Toast.LENGTH_SHORT).show();
-                        if(position == 7){
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse("http://www.storchapp.com"));
-                            startActivity(browserIntent);
-                        }
-                        return true;
-                    }
-                })
-                .build();
+                        switch (position) {
+                            case 1:
+                                onBackPressed();
+                                break;
 
+                            case 3:
+                                Intent favs = new Intent(MainActivity.this, FavouritesActivity.class);
+                                startActivity(favs);
+                                break;
+
+                            case 4:
+                                Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
+                                startActivity(settings);
+                                break;
+
+                            case 5:
+
+                                break;
+
+                            case 6:
+
+                                break;
+
+                            case 7:
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.storchapp.com"));
+                                startActivity(browserIntent);
+                                break;
+                        }
+                        return false;
+                    }
+                }).build();
 
         //will get from our database per week
         String[] items = {"Market & Food/Food/Cheese",
@@ -141,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
         adapter = new ArrayAdapter<>
                 (this, android.R.layout.simple_list_item_1, items);
-        suggestionList.setAdapter(adapter);
 
         searchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -153,6 +200,34 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 }
             }
         });
+
+        logInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent logInIntent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(logInIntent);
+            }
+        });
+        clientConnect("https://95.85.27.32/users/");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawer != null && mDrawer.isDrawerOpen()) {
+            mDrawer.closeDrawer();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_GET_ACCOUNTS) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            }
+        }
     }
 
     @Override
@@ -187,27 +262,33 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return true;
     }
 
-  /*  @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        Log.d(TAG, "onKeyDown: " + keyCode);
-       if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if(logo.isShown()){
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-            }else{
-                logo.setVisibility(View.VISIBLE);
-                searchBar.setVisibility(View.VISIBLE);
-                signUpButton.setVisibility(View.VISIBLE);
-                logInButton.setVisibility(View.VISIBLE);
-                mToolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                searchBar.clearFocus();
+    private void clientConnect(String url){
+        JSONObject responseJSON;
+        try{
+            URL mUrl = new URL(url);
+            HttpURLConnection urlConnection = (HttpURLConnection) mUrl.openConnection();
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in,"UTF-8"));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            String inputStr;
+
+            while((inputStr=bufferedReader.readLine()) != null){
+                stringBuilder.append(inputStr);
             }
-            return true;
+
+            try{
+                responseJSON = new JSONObject(stringBuilder.toString());
+            }catch (JSONException e){
+                Log.d(TAG, e.toString());
+            }
+            }catch (Exception e){
+            Toast.makeText(this, "Couldn't connect", Toast.LENGTH_LONG).show();
+            Log.d(TAG, e.toString());
         }
-        return super.onKeyDown(keyCode, event);
-    }*/
+
+    }
+
 
     private void doSearch(String query) {
         Intent queryIntent = new Intent(MainActivity.this, MapsActivity.class);

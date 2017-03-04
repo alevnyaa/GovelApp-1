@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1000881674015",
+    "project_id": "firebase-storch"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1000881674015:android:917480e691606a7f",
+        "android_client_info": {
+          "package_name": "com.storchapp.storch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1000881674015-c1u3c58vt6p3jr00onl7qcbafvf4mtuu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.storchapp.storch",
+            "certificate_hash": "4ea9beb081dcd2d22459f6198e18a2b442024372"
+          }
+        },
+        {
+          "client_id": "1000881674015-8h1ts3vft41ped9ighk4ouqrtd37uotg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh30NSXH03jvmq5dX7o4Af6vgzpMzTCs0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

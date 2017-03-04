@@ -74,18 +74,6 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
         this.menu = menu;
-
-      /*  MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.search), new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                return true;
-            }
-
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                return true;
-            }
-        });*/
         return true;
     }
 
@@ -112,6 +100,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         Intent queryIntent = new Intent(SearchActivity.this, MapsActivity.class);
         queryIntent.putExtra("query", query);
         startActivity(queryIntent);
+        finish();
     }
 
     //returns true if its a valid query
