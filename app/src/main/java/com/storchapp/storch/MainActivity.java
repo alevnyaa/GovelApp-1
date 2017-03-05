@@ -3,6 +3,7 @@ package com.storchapp.storch;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.storchapp.storch.restclient.RestClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -208,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 startActivity(logInIntent);
             }
         });
-        clientConnect("https://95.85.27.32/users/");
     }
 
     @Override
@@ -262,31 +263,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         return true;
     }
 
-    private void clientConnect(String url){
-        JSONObject responseJSON;
-        try{
-            URL mUrl = new URL(url);
-            HttpURLConnection urlConnection = (HttpURLConnection) mUrl.openConnection();
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in,"UTF-8"));
-            StringBuilder stringBuilder = new StringBuilder();
-
-            String inputStr;
-
-            while((inputStr=bufferedReader.readLine()) != null){
-                stringBuilder.append(inputStr);
-            }
-
-            try{
-                responseJSON = new JSONObject(stringBuilder.toString());
-            }catch (JSONException e){
-                Log.d(TAG, e.toString());
-            }
-            }catch (Exception e){
-            Toast.makeText(this, "Couldn't connect", Toast.LENGTH_LONG).show();
-            Log.d(TAG, e.toString());
-        }
-    }
 
     private void doSearch(String query) {
         Intent queryIntent = new Intent(MainActivity.this, MapsActivity.class);
@@ -314,5 +290,28 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
+    }
+
+    private class mAsyncTask extends AsyncTask<String, Void, Void>{
+        RestClient rc = new RestClient();
+
+        @Override
+        protected void onPreExecute() {
+            Toast.makeText(MainActivity.this, "Getting JSON from url.", Toast.LENGTH_SHORT).show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            rc.updateCategories();
+            rc.updateStores();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            Toast.makeText(MainActivity.this, "Success", Toast.LENGTH_LONG).show();
+            super.onPostExecute(result);
+        }
     }
 }

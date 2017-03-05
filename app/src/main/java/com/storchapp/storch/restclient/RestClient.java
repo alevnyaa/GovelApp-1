@@ -7,7 +7,9 @@ import android.widget.Toast;
 
 import com.storchapp.storch.MainActivity;
 import com.storchapp.storch.jsonparser.CategoryParser;
+import com.storchapp.storch.jsonparser.StoreParser;
 import com.storchapp.storch.models.Category;
+import com.storchapp.storch.models.Store;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,6 +26,7 @@ public class RestClient {
     public static final String TAG = "RestClient";
 
     CategoryParser cp = new CategoryParser();
+    StoreParser sp = new StoreParser();
 
     public void updateCategories(){
         try{
@@ -44,7 +47,21 @@ public class RestClient {
     }
 
     public void updateStores(){
-        return;
+        try{
+            sp.parseStoreList(httpsGetRawString("https://95.85.27.32/stores/"));
+        }catch(Exception e){
+            Log.d(TAG, e.toString());
+        }
+    }
+
+    public Store getStoreByID(int storeID){
+        String mURL = "https://95.85.27.32/stores/" + storeID + "/";
+        try{
+           return sp.parseStore(new JSONObject(httpsGetRawString(mURL)));
+        }catch (Exception e){
+            Log.d(TAG, e.toString());
+        }
+        return null;
     }
 
     private String httpsGetRawString(String url){

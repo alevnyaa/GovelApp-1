@@ -9,6 +9,6 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textSize="50dp"
-        android:text="info tab"/>
+        android:text="storeInfo tab"/>
 
 </RelativeLayout>

@@ -39,7 +39,7 @@ Details
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.storchapp.storch.shopclasses.Shop;
+import com.storchapp.storch.models.Store;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,8 +51,8 @@ import java.util.List;
 public class QueryParser {
     public static final String TAG = "QueryParser";
 
-    public static List<Shop> parseShopList(String restReply){
-        List<Shop> shopList = new ArrayList<>();
+    public static List<Store> parseShopList(String restReply){
+        List<Store> storeList = new ArrayList<>();
         try {
             JSONObject jsonRoot = new JSONObject(restReply);
             JSONArray places = jsonRoot.getJSONArray("places");
@@ -61,24 +61,26 @@ public class QueryParser {
                 JSONObject place = places.getJSONObject(i);
 
                 //should this be changed for a builder pattern instead of javabean pattern?
-                Shop shop = new Shop();
+                Store store = new Store();
 
-                shop.setId(place.getInt("id"));
-                shop.setName(place.getString("name"));
-                shop.setMainCategory(place.getString("mainCategory"));
-                shop.setPosition(new LatLng(
+                /*store.
+
+                store.setId(place.getInt("id"));
+                store.setName(place.getString("name"));
+                store.setMainCategory(place.getString("mainCategory"));
+                store.setPosition(new LatLng(
                         place.getDouble("latitude"),
                         place.getDouble("longitude")
                 ));
-                shop.setMarkerOptions();
-                //shop.setIcon();
-                shop.setInfo("info");
+                store.setMarkerOptions();
+                //store.setIcon();
+                store.setInfo("info");*/
 
-                shopList.add(shop);
+                storeList.add(store);
             }
         } catch (JSONException e) {
             Log.d(TAG, "error: can't parse json");
         }
-        return shopList;
+        return storeList;
     }
 }
