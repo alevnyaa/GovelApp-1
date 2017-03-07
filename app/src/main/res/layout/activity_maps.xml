@@ -149,7 +149,7 @@ sothree:umanoShadowHeight="4dp">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="info"/>
+                        android:text="storeInfo"/>
                 </LinearLayout>
             </ScrollView>
 

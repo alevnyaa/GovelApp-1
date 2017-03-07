@@ -67,7 +67,7 @@ import com.mikepenz.materialdrawer.model.ToggleDrawerItem;
 import com.storchapp.storch.jsonparser.QueryParser;
 import com.storchapp.storch.locationmenager.LocationManagerCheck;
 import com.storchapp.storch.restclient.RestClient;
-import com.storchapp.storch.shopclasses.Shop;
+import com.storchapp.storch.models.Store;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -95,7 +95,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final Pattern queryPattern = Pattern.compile("[a-zA-Z \t]+");
     private GoogleMap mMap;
     private String url = "govelapp.com/api";     //getResources().getString(R.string.url);
-    private List<Shop> shopList;
+    private List<Store> shopList;
     private String query;
 
     private SlidingUpPanelLayout slidingLayout;
@@ -178,7 +178,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //set tabLayout functionality
         mTabLayout.addTab(mTabLayout.newTab().setText("Info"));
-        mTabLayout.addTab(mTabLayout.newTab().setText("Search in Store"));
+        mTabLayout.addTab(mTabLayout.newTab().setText("Photos"));
+        mTabLayout.addTab(mTabLayout.newTab().setText("Products"));
         mTabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -658,7 +659,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void doSearch(String query){
         String params[] = {url, query};
         try{
-            new webGetSetMarkers().execute(params);
+            doSearch(params[1]);
         }catch (Exception e){
             Toast.makeText(MapsActivity.this, "Couldn't connect", Toast.LENGTH_SHORT).show();
         }
@@ -686,7 +687,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     //url, query, void ---- params[0], params[1], void
-    private class webGetSetMarkers extends AsyncTask<String, Void, Void> {
+    /*private class webGetSetMarkers extends AsyncTask<String, Void, Void> {
         //loading screen(?)
         @Override
         protected void onPreExecute() {
@@ -718,17 +719,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onPostExecute(result);
         }
 
-        /*@Override
+        @Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
-        }*/
+        }
 
         @Override
         protected void onCancelled(Void result) {
 
             super.onCancelled(result);
         }
-    }
+    }*/
 
     @Override
     public void onBackPressed() {

@@ -26,6 +26,10 @@ public class PagerAdapter extends FragmentStatePagerAdapter{
             case 1:
                 SearchTab searchTab = new SearchTab();
                 return searchTab;
+            case 2:
+                PhotosTab photosTab = new PhotosTab();
+                return photosTab;
+
             default:
                 return null;
         }

@@ -12,7 +12,7 @@ public class SplashActivity extends Activity {
 
     private static final int STOPSPLASH = 0;
     //time in milliseconds
-    private static final long SPLASHTIME = 3000;
+    private static final long SPLASHTIME = 1000;
 
     private ImageView splash;
 
